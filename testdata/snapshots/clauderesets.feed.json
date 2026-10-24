@@ -1,0 +1,399 @@
+{
+  "version": "https://jsonfeed.org/version/1.1",
+  "title": "Claude Resets",
+  "home_page_url": "https://clauderesets.com/",
+  "feed_url": "https://clauderesets.com/feed.json",
+  "description": "Publicly announced Claude usage-limit resets, tracked by hand. Independent project, not affiliated with Anthropic.",
+  "language": "en",
+  "items": [
+    {
+      "id": "https://clauderesets.com/resets/2026-10-21-claude-duet-reset",
+      "url": "https://clauderesets.com/resets/2026-10-21-claude-duet-reset",
+      "external_url": "https://support.claude.com/en/articles/17631495-get-started-with-claude-duet",
+      "title": "Claude Duet: one full limit reset when you are admitted",
+      "content_text": "Pro and Max subscribers with a US Claude account who are admitted to the Claude Duet research preview get one full limit reset, covering both the five-hour session and weekly limits. Use it by November 30, 2026 from Settings → Usage on the web or desktop (\"Reset for free\"). Admission is by waitlist in waves; Duet itself draws on the same plan limits as chat, including background work. Subscriber-redeemed reset credit. Stated expiry: 2026-11-30. Check Claude for account availability and the exact deadline. Not counted as an already-applied reset. Audience: Pro and Max subscribers with a US Claude account admitted to the Claude Duet research preview. Windows: five_hour, weekly. Source: @AnthropicAI https://support.claude.com/en/articles/17631495-get-started-with-claude-duet",
+      "date_published": "2026-10-21T19:09:37Z",
+      "date_modified": "2026-10-22T10:14:17Z",
+      "authors": [
+        {
+          "name": "@AnthropicAI (Anthropic)",
+          "url": "https://support.claude.com/en/articles/17631495-get-started-with-claude-duet"
+        }
+      ],
+      "tags": [
+        "credit",
+        "confirmed",
+        "limited",
+        "five_hour",
+        "weekly"
+      ],
+      "_claude_resets": {
+        "event_status": "confirmed",
+        "time_precision": "exact",
+        "announced_on": null,
+        "revision": 1
+      }
+    },
+    {
+      "id": "https://clauderesets.com/resets/2026-09-22-opus-5-5-reset",
+      "url": "https://clauderesets.com/resets/2026-09-22-opus-5-5-reset",
+      "external_url": "https://x.com/ClaudeDevs/status/2102438800836489554",
+      "title": "Opus 5.5: a reset you can save for later",
+      "content_text": "Pro, Max, and Team users received a banked reset with Opus 5.5 on September 22. Redeem it in Claude under Settings → Usage by October 22; check your account for the exact cutoff and which limits it restores. Subscriber-redeemed reset credit. Stated expiry: 2026-10-22. Check Claude for account availability and the exact deadline. Not counted as an already-applied reset. Audience: Pro, Max, and Team users. Windows: unspecified. Source: @ClaudeDevs https://x.com/ClaudeDevs/status/2102438800836489554",
+      "date_published": "2026-09-22T16:44:06Z",
+      "date_modified": "2026-10-17T05:58:16Z",
+      "authors": [
+        {
+          "name": "@ClaudeDevs (ClaudeDevs)",
+          "url": "https://x.com/ClaudeDevs/status/2102438800836489554"
+        }
+      ],
+      "tags": [
+        "credit",
+        "confirmed",
+        "limited",
+        "unspecified"
+      ],
+      "_claude_resets": {
+        "event_status": "confirmed",
+        "time_precision": "exact",
+        "announced_on": null,
+        "revision": 2
+      }
+    },
+    {
+      "id": "https://clauderesets.com/resets/2026-09-04-max-weekly",
+      "url": "https://clauderesets.com/resets/2026-09-04-max-weekly",
+      "external_url": "https://x.com/lydiahallie/status/2095967323412930677",
+      "title": "Weekly limits reset for Max plans",
+      "content_text": "Lydia Hallie announced that weekly limits had just been reset for everyone on a Claude Max plan, citing the Fable 5.1 release and a long weekend ahead. The post does not mention 5-hour limits or other plans. Audience: everyone on a Claude Max plan. Windows: weekly. Source: @lydiahallie https://x.com/lydiahallie/status/2095967323412930677",
+      "date_published": "2026-09-04T20:08:45Z",
+      "date_modified": "2026-09-17T20:00:00Z",
+      "authors": [
+        {
+          "name": "@lydiahallie (Lydia Hallie)",
+          "url": "https://x.com/lydiahallie/status/2095967323412930677"
+        }
+      ],
+      "tags": [
+        "usage_reset",
+        "confirmed",
+        "limited",
+        "weekly"
+      ],
+      "_claude_resets": {
+        "event_status": "confirmed",
+        "time_precision": "exact",
+        "announced_on": null,
+        "revision": 1
+      }
+    },
+    {
+      "id": "https://clauderesets.com/resets/2026-09-01-all-users",
+      "url": "https://clauderesets.com/resets/2026-09-01-all-users",
+      "external_url": "https://x.com/ClaudeDevs/status/2094856679250919746",
+      "title": "5-hour and weekly limits reset for all users",
+      "content_text": "ClaudeDevs announced that, alongside the Fable 5.1 release, 5-hour and weekly limits were reset for all users. Audience: all users. Windows: five_hour, weekly. Source: @ClaudeDevs https://x.com/ClaudeDevs/status/2094856679250919746",
+      "date_published": "2026-09-01T18:35:27Z",
+      "date_modified": "2026-09-17T20:00:00Z",
+      "authors": [
+        {
+          "name": "@ClaudeDevs (ClaudeDevs)",
+          "url": "https://x.com/ClaudeDevs/status/2094856679250919746"
+        }
+      ],
+      "tags": [
+        "usage_reset",
+        "confirmed",
+        "broad",
+        "five_hour",
+        "weekly"
+      ],
+      "_claude_resets": {
+        "event_status": "confirmed",
+        "time_precision": "exact",
+        "announced_on": null,
+        "revision": 1
+      }
+    },
+    {
+      "id": "https://clauderesets.com/resets/2026-07-16-all-users",
+      "url": "https://clauderesets.com/resets/2026-07-16-all-users",
+      "external_url": "https://x.com/ClaudeDevs/status/2077603834453770467",
+      "title": "5-hour and weekly limits reset for all users",
+      "content_text": "ClaudeDevs announced that 5-hour and weekly rate limits were reset for all users. The post was published at 03:58 UTC on July 16, which was the evening of July 15 in US time zones. Audience: all users. Windows: five_hour, weekly. Source: @ClaudeDevs https://x.com/ClaudeDevs/status/2077603834453770467",
+      "date_published": "2026-07-16T03:58:48Z",
+      "date_modified": "2026-09-17T20:00:00Z",
+      "authors": [
+        {
+          "name": "@ClaudeDevs (ClaudeDevs)",
+          "url": "https://x.com/ClaudeDevs/status/2077603834453770467"
+        }
+      ],
+      "tags": [
+        "usage_reset",
+        "confirmed",
+        "broad",
+        "five_hour",
+        "weekly"
+      ],
+      "_claude_resets": {
+        "event_status": "confirmed",
+        "time_precision": "exact",
+        "announced_on": null,
+        "revision": 1
+      }
+    },
+    {
+      "id": "https://clauderesets.com/resets/2026-07-09-all-users",
+      "url": "https://clauderesets.com/resets/2026-07-09-all-users",
+      "external_url": "https://x.com/ClaudeDevs/status/2075279141352706215",
+      "title": "5-hour and weekly limits reset for all users",
+      "content_text": "ClaudeDevs announced that 5-hour and weekly rate limits were reset for all users. Audience: all users. Windows: five_hour, weekly. Source: @ClaudeDevs https://x.com/ClaudeDevs/status/2075279141352706215",
+      "date_published": "2026-07-09T18:01:18Z",
+      "date_modified": "2026-09-17T20:00:00Z",
+      "authors": [
+        {
+          "name": "@ClaudeDevs (ClaudeDevs)",
+          "url": "https://x.com/ClaudeDevs/status/2075279141352706215"
+        }
+      ],
+      "tags": [
+        "usage_reset",
+        "confirmed",
+        "broad",
+        "five_hour",
+        "weekly"
+      ],
+      "_claude_resets": {
+        "event_status": "confirmed",
+        "time_precision": "exact",
+        "announced_on": null,
+        "revision": 1
+      }
+    },
+    {
+      "id": "https://clauderesets.com/resets/2026-07-01-everyone",
+      "url": "https://clauderesets.com/resets/2026-07-01-everyone",
+      "external_url": "https://x.com/ClaudeDevs/status/2072429181565288665",
+      "title": "Limits reset for everyone as Fable 5 returns",
+      "content_text": "ClaudeDevs announced that everyone's 5-hour and weekly rate limits were reset, tied to Fable 5 being ready to build with again. Audience: everyone. Windows: five_hour, weekly. Source: @ClaudeDevs https://x.com/ClaudeDevs/status/2072429181565288665",
+      "date_published": "2026-07-01T21:16:35Z",
+      "date_modified": "2026-09-17T20:00:00Z",
+      "authors": [
+        {
+          "name": "@ClaudeDevs (ClaudeDevs)",
+          "url": "https://x.com/ClaudeDevs/status/2072429181565288665"
+        }
+      ],
+      "tags": [
+        "usage_reset",
+        "confirmed",
+        "broad",
+        "five_hour",
+        "weekly"
+      ],
+      "_claude_resets": {
+        "event_status": "confirmed",
+        "time_precision": "exact",
+        "announced_on": null,
+        "revision": 1
+      }
+    },
+    {
+      "id": "https://clauderesets.com/resets/2026-06-20-everyone-all-plans",
+      "url": "https://clauderesets.com/resets/2026-06-20-everyone-all-plans",
+      "external_url": "https://x.com/ClaudeDevs/status/2068122937308426676",
+      "title": "Limits reset for everyone across all plans",
+      "content_text": "In a follow-up to the June 19 targeted reset, ClaudeDevs announced that 5-hour and weekly usage limits were reset for everyone, across all plans. Audience: everyone, across all plans. Windows: five_hour, weekly. Source: @ClaudeDevs https://x.com/ClaudeDevs/status/2068122937308426676",
+      "date_published": "2026-06-20T00:05:06Z",
+      "date_modified": "2026-09-17T20:00:00Z",
+      "authors": [
+        {
+          "name": "@ClaudeDevs (ClaudeDevs)",
+          "url": "https://x.com/ClaudeDevs/status/2068122937308426676"
+        }
+      ],
+      "tags": [
+        "usage_reset",
+        "confirmed",
+        "broad",
+        "five_hour",
+        "weekly"
+      ],
+      "_claude_resets": {
+        "event_status": "confirmed",
+        "time_precision": "exact",
+        "announced_on": null,
+        "revision": 1
+      }
+    },
+    {
+      "id": "https://clauderesets.com/resets/2026-06-19-affected-users",
+      "url": "https://clauderesets.com/resets/2026-06-19-affected-users",
+      "external_url": "https://x.com/ClaudeDevs/status/2067802163498352929",
+      "title": "Limits reset for users affected by a usage-display bug",
+      "content_text": "ClaudeDevs reported that about 3% of Claude Code Max and Pro users hit a bug showing an incorrect weekly usage limit, and said 5-hour and weekly limits were being reset for everyone affected. This reset was limited to affected users. Audience: everyone affected (about 3% of Claude Code Max and Pro users). Windows: five_hour, weekly. Source: @ClaudeDevs https://x.com/ClaudeDevs/status/2067802163498352929",
+      "date_published": "2026-06-19T02:50:28Z",
+      "date_modified": "2026-09-17T20:00:00Z",
+      "authors": [
+        {
+          "name": "@ClaudeDevs (ClaudeDevs)",
+          "url": "https://x.com/ClaudeDevs/status/2067802163498352929"
+        }
+      ],
+      "tags": [
+        "usage_reset",
+        "confirmed",
+        "limited",
+        "five_hour",
+        "weekly"
+      ],
+      "_claude_resets": {
+        "event_status": "confirmed",
+        "time_precision": "exact",
+        "announced_on": null,
+        "revision": 1
+      }
+    },
+    {
+      "id": "https://clauderesets.com/resets/2026-06-13-all-users",
+      "url": "https://clauderesets.com/resets/2026-06-13-all-users",
+      "external_url": "https://x.com/ClaudeDevs/status/2065621176735646006",
+      "title": "5-hour and weekly limits reset for all users",
+      "content_text": "ClaudeDevs announced that 5-hour and weekly rate limits were reset for all users. Audience: all users. Windows: five_hour, weekly. Source: @ClaudeDevs https://x.com/ClaudeDevs/status/2065621176735646006",
+      "date_published": "2026-06-13T02:24:00Z",
+      "date_modified": "2026-09-17T20:00:00Z",
+      "authors": [
+        {
+          "name": "@ClaudeDevs (ClaudeDevs)",
+          "url": "https://x.com/ClaudeDevs/status/2065621176735646006"
+        }
+      ],
+      "tags": [
+        "usage_reset",
+        "confirmed",
+        "broad",
+        "five_hour",
+        "weekly"
+      ],
+      "_claude_resets": {
+        "event_status": "confirmed",
+        "time_precision": "exact",
+        "announced_on": null,
+        "revision": 1
+      }
+    },
+    {
+      "id": "https://clauderesets.com/resets/2026-06-09-all-users",
+      "url": "https://clauderesets.com/resets/2026-06-09-all-users",
+      "external_url": "https://x.com/ClaudeDevs/status/2064464557951852643",
+      "title": "5-hour and weekly limits reset for all users at the Fable 5 launch",
+      "content_text": "ClaudeDevs announced that 5-hour and weekly rate limits were reset for all users to mark the Fable 5 release. Alex Albert relayed the same reset shortly after, describing it as applying across Anthropic's products. Audience: all users. Windows: five_hour, weekly. Source: @ClaudeDevs https://x.com/ClaudeDevs/status/2064464557951852643",
+      "date_published": "2026-06-09T21:48:01Z",
+      "date_modified": "2026-09-17T20:00:00Z",
+      "authors": [
+        {
+          "name": "@ClaudeDevs (ClaudeDevs)",
+          "url": "https://x.com/ClaudeDevs/status/2064464557951852643"
+        }
+      ],
+      "tags": [
+        "usage_reset",
+        "confirmed",
+        "broad",
+        "five_hour",
+        "weekly"
+      ],
+      "_claude_resets": {
+        "event_status": "confirmed",
+        "time_precision": "exact",
+        "announced_on": null,
+        "revision": 1
+      }
+    },
+    {
+      "id": "https://clauderesets.com/resets/2026-06-01-pro-max",
+      "url": "https://clauderesets.com/resets/2026-06-01-pro-max",
+      "external_url": "https://x.com/ClaudeDevs/status/2061501787769893055",
+      "title": "Limits reset for Pro and Max users after a subagent bug",
+      "content_text": "ClaudeDevs announced that 5-hour and weekly rate limits were reset for all users on Pro and Max plans, after fixing an issue that made some Claude Code sessions spawn excessive parallel subagents. Audience: all users on Pro and Max plans. Windows: five_hour, weekly. Source: @ClaudeDevs https://x.com/ClaudeDevs/status/2061501787769893055",
+      "date_published": "2026-06-01T17:35:01Z",
+      "date_modified": "2026-09-17T20:00:00Z",
+      "authors": [
+        {
+          "name": "@ClaudeDevs (ClaudeDevs)",
+          "url": "https://x.com/ClaudeDevs/status/2061501787769893055"
+        }
+      ],
+      "tags": [
+        "usage_reset",
+        "confirmed",
+        "limited",
+        "five_hour",
+        "weekly"
+      ],
+      "_claude_resets": {
+        "event_status": "confirmed",
+        "time_precision": "exact",
+        "announced_on": null,
+        "revision": 1
+      }
+    },
+    {
+      "id": "https://clauderesets.com/resets/2026-05-15-everyone",
+      "url": "https://clauderesets.com/resets/2026-05-15-everyone",
+      "external_url": "https://x.com/ClaudeDevs/status/2055347539923308703",
+      "title": "Everyone's 5-hour and weekly limits reset",
+      "content_text": "ClaudeDevs announced on a Friday that everyone's 5-hour and weekly rate limits had been reset. Audience: everyone. Windows: five_hour, weekly. Source: @ClaudeDevs https://x.com/ClaudeDevs/status/2055347539923308703",
+      "date_published": "2026-05-15T18:00:14Z",
+      "date_modified": "2026-09-17T20:00:00Z",
+      "authors": [
+        {
+          "name": "@ClaudeDevs (ClaudeDevs)",
+          "url": "https://x.com/ClaudeDevs/status/2055347539923308703"
+        }
+      ],
+      "tags": [
+        "usage_reset",
+        "confirmed",
+        "broad",
+        "five_hour",
+        "weekly"
+      ],
+      "_claude_resets": {
+        "event_status": "confirmed",
+        "time_precision": "exact",
+        "announced_on": null,
+        "revision": 1
+      }
+    },
+    {
+      "id": "https://clauderesets.com/resets/2026-04-23-all-subscribers",
+      "url": "https://clauderesets.com/resets/2026-04-23-all-subscribers",
+      "external_url": "https://x.com/ClaudeDevs/status/2047371123185287223",
+      "title": "Usage limits reset for all subscribers after the Claude Code post-mortem",
+      "content_text": "After publishing a post-mortem on three Claude Code quality issues, ClaudeDevs announced that usage limits were reset for all subscribers. The post does not say which limit windows were reset. Boris Cherny linked to the post-mortem the same day. Audience: all subscribers. Windows: unspecified. Source: @ClaudeDevs https://x.com/ClaudeDevs/status/2047371123185287223",
+      "date_published": "2026-04-23T17:44:48Z",
+      "date_modified": "2026-09-17T20:00:00Z",
+      "authors": [
+        {
+          "name": "@ClaudeDevs (ClaudeDevs)",
+          "url": "https://x.com/ClaudeDevs/status/2047371123185287223"
+        }
+      ],
+      "tags": [
+        "usage_reset",
+        "confirmed",
+        "broad",
+        "unspecified"
+      ],
+      "_claude_resets": {
+        "event_status": "confirmed",
+        "time_precision": "exact",
+        "announced_on": null,
+        "revision": 1
+      }
+    }
+  ]
+}

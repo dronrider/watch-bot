@@ -1,0 +1,7 @@
+/resetwatch
+*.db
+*.db-journal
+*.db-wal
+*.db-shm
+configs/config.toml
+*.env

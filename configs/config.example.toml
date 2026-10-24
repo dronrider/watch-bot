@@ -1,0 +1,40 @@
+# Пример конфигурации resetwatch. Скопировать в configs/config.toml
+# и поправить пути под машину.
+#
+# Секреты в конфиге не живут: бот Telegram берёт токен и chat id из
+# окружения (файл окружения для systemd в deploy/resetwatch.env.example):
+#   RESETWATCH_BOT_TOKEN     токен бота
+#   RESETWATCH_BOT_CHAT_ID   chat id получателя
+
+[state]
+# SQLite-файл состояния: дедуп событий, ключи адаптеров, свежесть.
+path = "/var/lib/resetwatch/state.db"
+
+[notify]
+# На сегодня доступен один канал уведомлений.
+kind = "telegram"
+
+# Каждый источник это скрипт в adapters/ и своё расписание.
+# schedule по умолчанию "0 */2 * * *" (раз в два часа),
+# freshness_days по умолчанию 3.
+
+[[source]]
+script = "adapters/clauderesets.js"
+schedule = "0 */2 * * *"
+freshness_days = 3
+enabled = true
+
+[[source]]
+script = "adapters/modelyard.js"
+schedule = "30 */2 * * *"
+freshness_days = 3
+enabled = true
+
+[[source]]
+script = "adapters/codexresetdev.js"
+schedule = "15 */2 * * *"
+freshness_days = 5
+enabled = true
+
+# Четвёртый источник codexreset.org это HTML-таймлайн без API. Пока у него
+# нет адаптера, в конфиг он не включается.

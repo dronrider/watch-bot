@@ -1,0 +1,16 @@
+[Unit]
+Description=Монитор сбросов лимитов resetwatch
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=/opt/resetwatch
+ExecStart=/opt/resetwatch/resetwatch -config /opt/resetwatch/config.toml
+EnvironmentFile=/opt/resetwatch/resetwatch.env
+User=resetwatch
+StateDirectory=resetwatch
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target

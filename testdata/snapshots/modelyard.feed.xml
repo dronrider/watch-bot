@@ -1,0 +1,273 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>ModelYard · Tibo Codex Monitor</title>
+    <link>https://tibo.modelyard.dev/</link>
+    <description>Public Codex usage-limit reset, rate-limit and subscription policy events tracked by ModelYard.</description>
+    <language>en</language>
+    <lastBuildDate>Fri, 23 Oct 2026 23:13:40 GMT</lastBuildDate>
+    <atom:link href="https://tibo.modelyard.dev/feed.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Codex CLI adds prompt presets, inline settings, enterprise MCP sign-in</title>
+      <description>Tibo announced Codex CLI updates: reusable prompt presets, inline model and permission settings, enterprise MCP sign-in, fixes for resuming long sessions, and Windows corporate-proxy authentication. He also noted CLI usage has doubled since DevDay.
+
+Source text: On codex cli updates. We&apos;ve added reusable prompt presets, inline model and permission settings, and enterprise MCP sign-in. We&apos;ve also fixed failures when resuming long sessions and added Windows corporate-proxy authentication.
+
+Surprisingly the CLI has grown 2X in usage since devday.
+
+Source: https://x.com/thsottiaux/status/2113770862860222611</description>
+      <link>https://tibo.modelyard.dev/events/130</link>
+      <guid isPermaLink="true">https://tibo.modelyard.dev/events/130</guid>
+      <pubDate>Fri, 23 Oct 2026 23:13:40 GMT</pubDate>
+      <category>Codex Update</category>
+    </item>
+    <item>
+      <title>Codex CLI updated; reasoning changes no longer invalidate cache</title>
+      <description>Tibo reports small updates: calls connect faster for dots, changing reasoning mid-conversation in Codex and Work no longer invalidates the cache, and the Codex CLI has been updated.
+
+Source text: Day 19/ Small updates. Calls connect much faster for dots, changing reasoning in codex &amp;amp; work mid conversation does not invalidate cache anymore and a we&apos;ve also updated the codex cli.
+
+Source: https://x.com/thsottiaux/status/2113770573994299544</description>
+      <link>https://tibo.modelyard.dev/events/131</link>
+      <guid isPermaLink="true">https://tibo.modelyard.dev/events/131</guid>
+      <pubDate>Fri, 23 Oct 2026 23:12:31 GMT</pubDate>
+      <category>Codex Update</category>
+    </item>
+    <item>
+      <title>Codex and Work keep prompt cache indefinitely</title>
+      <description>Tibo says API users can now cache for 12 hours, while logged-in Codex and Work users keep cache indefinitely with no penalty for resuming old conversations and are now guaranteed to hit the cache.
+
+Source text: Day 16/
+
+You can now cache for 12h in the API and for logged in users across Codex &amp;amp; Work we keep cache forever and you don’t have any penalty for coming back to an old conversation or resuming after a few hours and are now guaranteed to hit the cache. https://t.co/0HYeB01KVh
+
+Source: https://x.com/thsottiaux/status/2112712984644784534</description>
+      <link>https://tibo.modelyard.dev/events/126</link>
+      <guid isPermaLink="true">https://tibo.modelyard.dev/events/126</guid>
+      <pubDate>Wed, 21 Oct 2026 01:10:02 GMT</pubDate>
+      <category>Codex Update</category>
+    </item>
+    <item>
+      <title>OpenAI Developers shares what&apos;s coming with Codex</title>
+      <description>Tibo quotes an official OpenAI Developers post saying &quot;Here&apos;s what we&apos;re cooking with Codex,&quot; linking to a Codex announcement; the specific contents are not visible in the post text.
+
+Source text: Day 15/ We&apos;re cooked https://t.co/ciJpOJlmOn
+
+Source: https://x.com/thsottiaux/status/2112268918681485431</description>
+      <link>https://tibo.modelyard.dev/events/125</link>
+      <guid isPermaLink="true">https://tibo.modelyard.dev/events/125</guid>
+      <pubDate>Mon, 19 Oct 2026 19:45:28 GMT</pubDate>
+      <category>Codex Update</category>
+    </item>
+    <item>
+      <title>Day 13: Codex/Work global reset planned</title>
+      <description>Tibo directly replies to the campaign day marker and plans a global reset by end of day (the source timezone is preserved in the linked original). The verified Codex/Work campaign establishes product context. This is a plan, not completion.
+
+Source text: Landing sometime today by EOD PST
+
+Source: https://x.com/thsottiaux/status/2111492738025959922</description>
+      <link>https://tibo.modelyard.dev/events/124</link>
+      <guid isPermaLink="true">https://tibo.modelyard.dev/events/124</guid>
+      <pubDate>Sat, 17 Oct 2026 16:21:13 GMT</pubDate>
+      <category>Reset Planned</category>
+    </item>
+    <item>
+      <title>Codex and Work usage improved via context and routing changes</title>
+      <description>Tibo announced that improvements to Codex and Work increase effective usage, achieved by reusing context across subagents, keeping context cached longer, and better request routing for higher cache hits.
+
+Source text: Day 12/
+
+We’ve made improvements to Codex &amp;amp; Work that increase the effective usage you get. We achieved this by reusing context across subagents, keeping context cached longer, and improved request routing that allows us to increase cache hits.
+
+Source: https://x.com/thsottiaux/status/2111244596131111253</description>
+      <link>https://tibo.modelyard.dev/events/123</link>
+      <guid isPermaLink="true">https://tibo.modelyard.dev/events/123</guid>
+      <pubDate>Fri, 16 Oct 2026 23:55:11 GMT</pubDate>
+      <category>Codex Update</category>
+    </item>
+    <item>
+      <title>OpenAI announces GPT-Live-1.1 voice update for Codex</title>
+      <description>Tibo shares OpenAI&apos;s announcement that GPT-Live-1.1 brings new voices, better accents, and reduced &quot;checking...&quot; latency to Voice in ChatGPT, Codex, and dots, rolling out today to all users and coming soon to the API.
+
+Source text: Bonjour https://t.co/9sebD9hvyf
+
+Source: https://x.com/thsottiaux/status/2110864606088593672</description>
+      <link>https://tibo.modelyard.dev/events/122</link>
+      <guid isPermaLink="true">https://tibo.modelyard.dev/events/122</guid>
+      <pubDate>Thu, 15 Oct 2026 22:45:14 GMT</pubDate>
+      <category>Codex Update</category>
+    </item>
+    <item>
+      <title>Tibo confirms the Day 10 Codex reset is done</title>
+      <description>Tibo quotes the directly linked reset delivery plan and says it is done, within the verified 28-day Codex/Work campaign. This is the author’s confirmation; no exact account-level effective time is stated.
+
+Source text: Done and dusted https://t.co/0fehr43VS4
+
+Source: https://x.com/thsottiaux/status/2110618732666257557</description>
+      <link>https://tibo.modelyard.dev/events/119</link>
+      <guid isPermaLink="true">https://tibo.modelyard.dev/events/119</guid>
+      <pubDate>Thu, 15 Oct 2026 06:28:13 GMT</pubDate>
+      <category>Reset Completed</category>
+    </item>
+    <item>
+      <title>Tibo expects the Day 10 Codex reset within 2 hours</title>
+      <description>In a direct reply to the Day 10 reset marker within the verified 28-day Codex/Work campaign, Tibo expects delivery within 2 hours of this post. This is a planned window, not confirmation of completion.
+
+Source text: Landing within the next 2 hours
+
+Source: https://x.com/thsottiaux/status/2110595554036400151</description>
+      <link>https://tibo.modelyard.dev/events/118</link>
+      <guid isPermaLink="true">https://tibo.modelyard.dev/events/118</guid>
+      <pubDate>Thu, 15 Oct 2026 04:56:07 GMT</pubDate>
+      <category>Reset Planned</category>
+    </item>
+    <item>
+      <title>Codex desktop disk storage reduced by 60%</title>
+      <description>Tibo announced that optimizations to how the ChatGPT and Codex desktop app stores state on disk have rolled out, expected to cut disk usage by about 60% in response to power-user feedback.
+
+Source text: Day 9/
+
+We&apos;ve rolled out optimizations to how we store state on disk for the chatgpt &amp;amp; codex desktop app that should reduce the amount stored on disk by 60%. Small ship but we&apos;ve heard enough feedback about power users running out of disk space.
+
+Source: https://x.com/thsottiaux/status/2110151780478927344</description>
+      <link>https://tibo.modelyard.dev/events/117</link>
+      <guid isPermaLink="true">https://tibo.modelyard.dev/events/117</guid>
+      <pubDate>Tue, 13 Oct 2026 23:32:43 GMT</pubDate>
+      <category>Codex Update</category>
+    </item>
+    <item>
+      <title>Day 8: Codex and Work reset announced complete</title>
+      <description>Tibo said the reset was done while directly quoting his Day 8 global-reset plan. The linked plan, marker and earlier Codex/Work campaign pledge establish the product context. The timestamp is the announcement time; the post does not establish the exact time or propagation state for each account.
+
+Source text: What would you like with your side of reset? It&apos;s done. https://t.co/gpNaB6otgy
+
+Source: https://x.com/thsottiaux/status/2109873287853707513</description>
+      <link>https://tibo.modelyard.dev/events/121</link>
+      <guid isPermaLink="true">https://tibo.modelyard.dev/events/121</guid>
+      <pubDate>Tue, 13 Oct 2026 05:06:06 GMT</pubDate>
+      <category>Reset Completed</category>
+    </item>
+    <item>
+      <title>Day 8: Codex and Work global reset planned</title>
+      <description>Tibo announced a global reset by end of day (stated as PST) in a direct reply to his Day 8 reset marker. The earlier Codex/Work campaign pledge establishes the product context. This post announces a plan; the completion was announced separately.
+
+Source text: Global reset landing by EOD PST time. Enjoy
+
+Source: https://x.com/thsottiaux/status/2109812360596865224</description>
+      <link>https://tibo.modelyard.dev/events/120</link>
+      <guid isPermaLink="true">https://tibo.modelyard.dev/events/120</guid>
+      <pubDate>Tue, 13 Oct 2026 01:03:59 GMT</pubDate>
+      <category>Reset Planned</category>
+    </item>
+    <item>
+      <title>Codex default context raised to 500k for GPT-6.1 Sol</title>
+      <description>Tibo announced that the default context length for GPT-6.1 Sol through Codex and Work is now 500k, up from 272k, with a 1M maximum available via override. He said they will go higher in the future.
+
+Source text: Day 7/
+
+We have increased default context length for GPT-6.1 Sol to 500k when used through Codex &amp; Work, up from 272k or an ~ 80% increase.
+
+We will go higher in the future, but it helps reduce occurrence of compactions and with tasks that require keeping a lot of context and nuance over periods of time. It was carefully tested and is the new sweet spot for most of our users. You can still override it if you want to be higher our lower, with maximum context length of GPT-6.1 Sol of 1M.
+
+Source: https://x.com/thsottiaux/status/2109430343346581527</description>
+      <link>https://tibo.modelyard.dev/events/116</link>
+      <guid isPermaLink="true">https://tibo.modelyard.dev/events/116</guid>
+      <pubDate>Sun, 11 Oct 2026 23:45:59 GMT</pubDate>
+      <category>Codex Update</category>
+    </item>
+    <item>
+      <title>Tibo says the global Codex reset has propagated</title>
+      <description>Tibo quotes the directly linked reset announcement from the verified 28-day Codex/Work commitment and says the reset has fully propagated. The source does not give an exact completion time.
+
+Source text: Put the reset in the bag. All propagated. https://t.co/HGxaD3Zdcj
+
+Source: https://x.com/thsottiaux/status/2109132167112782291</description>
+      <link>https://tibo.modelyard.dev/events/115</link>
+      <guid isPermaLink="true">https://tibo.modelyard.dev/events/115</guid>
+      <pubDate>Sun, 11 Oct 2026 04:01:09 GMT</pubDate>
+      <category>Reset Completed</category>
+    </item>
+    <item>
+      <title>Tibo announces a global Codex reset by end of day</title>
+      <description>Tibo announces a global reset by the end of the day as the reset outcome of the verified 28-day Codex/Work commitment. The source does not specify a timezone, and the announcement does not confirm completion.
+
+Source text: Global reset by EOD. May the tokens do good things for you.
+
+Source: https://x.com/thsottiaux/status/2109045392684032299</description>
+      <link>https://tibo.modelyard.dev/events/114</link>
+      <guid isPermaLink="true">https://tibo.modelyard.dev/events/114</guid>
+      <pubDate>Sat, 10 Oct 2026 22:16:20 GMT</pubDate>
+      <category>Reset Planned</category>
+    </item>
+    <item>
+      <title>Codex adds composer predictions beta</title>
+      <description>Tibo says composer predictions in the desktop app can suggest a likely next message and are included in Pro without consuming usage.
+
+Source text: Day 5/
+
+Composer predictions in the desktop app. Often leads to a double take with how on point they are. Included in the Pro plans without consuming usage. https://t.co/02dqoClrWn
+
+Source: https://x.com/thsottiaux/status/2108645667451318747</description>
+      <link>https://tibo.modelyard.dev/events/111</link>
+      <guid isPermaLink="true">https://tibo.modelyard.dev/events/111</guid>
+      <pubDate>Fri, 09 Oct 2026 19:47:58 GMT</pubDate>
+      <category>Codex Update</category>
+    </item>
+    <item>
+      <title>Tibo says Codex Cloud was silently re-shipped</title>
+      <description>Tibo states that Codex Cloud was silently re-shipped and describes it as &quot;pretty good now,&quot; indicating a completed product change.
+
+Source text: Day 3 (encore)/
+
+We silently re-shipped codex cloud. It’s pretty good now https://t.co/Fau14sCke8
+
+Source: https://x.com/thsottiaux/status/2108084615349170480</description>
+      <link>https://tibo.modelyard.dev/events/106</link>
+      <guid isPermaLink="true">https://tibo.modelyard.dev/events/106</guid>
+      <pubDate>Thu, 08 Oct 2026 06:38:33 GMT</pubDate>
+      <category>Codex Update</category>
+    </item>
+    <item>
+      <title>Tibo clarifies the banked reset delivery window</title>
+      <description>Tibo says the previously announced reset card should arrive by the end of the day in PST. This is an expected delivery window, not confirmation of receipt or redemption.
+
+Source text: Will be there by EOD PST.
+
+Source: https://x.com/thsottiaux/status/2107913738791596286</description>
+      <link>https://tibo.modelyard.dev/events/104</link>
+      <guid isPermaLink="true">https://tibo.modelyard.dev/events/104</guid>
+      <pubDate>Wed, 07 Oct 2026 19:19:33 GMT</pubDate>
+      <category>Reset cards</category>
+    </item>
+    <item>
+      <title>Tibo is distributing banked reset cards</title>
+      <description>Tibo announces an ongoing distribution of saved reset cards for paid accounts. Users can redeem them later; this does not confirm receipt by every account or an automatic quota reset. No absolute delivery timestamp is stated.
+
+Source text: Day 3/
+
+The big one is GPT-6 in Chat, but today is also a little celebration day with a new high of 40M active users across Codex and ChatGPT Work.
+
+Loading a banked reset in everyone&apos;s paid accounts. See you again tomorrow! https://t.co/mHSI0PbWfe
+
+Source: https://x.com/thsottiaux/status/2107913674593644711</description>
+      <link>https://tibo.modelyard.dev/events/103</link>
+      <guid isPermaLink="true">https://tibo.modelyard.dev/events/103</guid>
+      <pubDate>Wed, 07 Oct 2026 19:19:17 GMT</pubDate>
+      <category>Reset cards</category>
+    </item>
+    <item>
+      <title>Tibo says the reset has been processed</title>
+      <description>Tibo states that after community demand and his own calibration, &quot;the reset has been processed,&quot; framing it as completed rather than planned.
+
+Source text: We shipped four things that were deemed good to great and some math proofs, but the vote is clear and the community demands a reset. I did calibrate it and it *seems* that the game is rigged in reset&apos;s favor, but such are the rules at the moment.
+
+Therefore ... the reset has been processed. Enjoy!
+
+Source: https://x.com/thsottiaux/status/2107676072871600470</description>
+      <link>https://tibo.modelyard.dev/events/102</link>
+      <guid isPermaLink="true">https://tibo.modelyard.dev/events/102</guid>
+      <pubDate>Wed, 07 Oct 2026 03:35:09 GMT</pubDate>
+      <category>Reset Completed</category>
+    </item>
+  </channel>
+</rss>
