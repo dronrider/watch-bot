@@ -29,15 +29,16 @@ const watchdogSchedule = "0 * * * *"
 
 func main() {
 	configPath := flag.String("config", "configs/config.toml", "путь к конфигурации")
+	once := flag.Bool("once", false, "прогнать источники один раз и выйти")
 	flag.Parse()
 	log := slog.New(slog.NewTextHandler(os.Stdout, nil))
-	if err := run(*configPath, log); err != nil {
+	if err := run(*configPath, *once, log); err != nil {
 		log.Error("остановка", "err", err)
 		os.Exit(1)
 	}
 }
 
-func run(configPath string, log *slog.Logger) error {
+func run(configPath string, once bool, log *slog.Logger) error {
 	cfg, err := config.Load(configPath)
 	if err != nil {
 		return err
@@ -64,6 +65,22 @@ func run(configPath string, log *slog.Logger) error {
 		Store:  store,
 		Notify: notifier,
 		Log:    log,
+	}
+
+	// Разовый прогон это дым и проверка руками: тика планировщика он не ждёт.
+	if once {
+		for _, src := range cfg.Sources {
+			if !src.Enabled {
+				continue
+			}
+			ctx, cancel := context.WithTimeout(context.Background(), runTimeout)
+			defer cancel()
+			pipe.Run(ctx, src)
+		}
+		dctx, dcancel := context.WithTimeout(context.Background(), runTimeout)
+		defer dcancel()
+		dog.Check(dctx, cfg.Sources)
+		return nil
 	}
 
 	scheduler := cron.New()
