@@ -13,12 +13,12 @@ import (
 
 	"github.com/robfig/cron/v3"
 
-	"github.com/dronrider/resetwatch/internal/config"
-	"github.com/dronrider/resetwatch/internal/harness"
-	"github.com/dronrider/resetwatch/internal/notify"
-	"github.com/dronrider/resetwatch/internal/pipeline"
-	"github.com/dronrider/resetwatch/internal/state"
-	"github.com/dronrider/resetwatch/internal/watchdog"
+	"github.com/dronrider/watch-bot/internal/config"
+	"github.com/dronrider/watch-bot/internal/harness"
+	"github.com/dronrider/watch-bot/internal/notify"
+	"github.com/dronrider/watch-bot/internal/pipeline"
+	"github.com/dronrider/watch-bot/internal/state"
+	"github.com/dronrider/watch-bot/internal/watchdog"
 )
 
 // runTimeout режет зависший прогон адаптера, чтобы cron не копил задания.

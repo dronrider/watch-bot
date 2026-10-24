@@ -1,4 +1,4 @@
-module github.com/dronrider/resetwatch
+module github.com/dronrider/watch-bot
 
 go 1.26.5
 

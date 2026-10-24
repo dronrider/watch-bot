@@ -8,8 +8,8 @@ import (
 	"log/slog"
 	"time"
 
-	"github.com/dronrider/resetwatch/internal/config"
-	"github.com/dronrider/resetwatch/internal/notify"
+	"github.com/dronrider/watch-bot/internal/config"
+	"github.com/dronrider/watch-bot/internal/notify"
 )
 
 const silentKey = "watchdog:silent_notified"

@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/dronrider/resetwatch/internal/config"
+	"github.com/dronrider/watch-bot/internal/config"
 )
 
 type fakeStore struct {

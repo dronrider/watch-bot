@@ -10,9 +10,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/dronrider/resetwatch/internal/config"
-	"github.com/dronrider/resetwatch/internal/harness"
-	"github.com/dronrider/resetwatch/internal/notify"
+	"github.com/dronrider/watch-bot/internal/config"
+	"github.com/dronrider/watch-bot/internal/harness"
+	"github.com/dronrider/watch-bot/internal/notify"
 )
 
 // Store это часть состояния, которой хватает конвейеру.

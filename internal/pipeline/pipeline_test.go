@@ -9,9 +9,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/dronrider/resetwatch/internal/config"
-	"github.com/dronrider/resetwatch/internal/harness"
-	"github.com/dronrider/resetwatch/internal/state"
+	"github.com/dronrider/watch-bot/internal/config"
+	"github.com/dronrider/watch-bot/internal/harness"
+	"github.com/dronrider/watch-bot/internal/state"
 )
 
 type fakeNotifier struct {
