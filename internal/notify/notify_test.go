@@ -73,3 +73,44 @@ func TestTelegramFromEnv(t *testing.T) {
 		t.Fatal("без переменных окружения ожидалась ошибка")
 	}
 }
+
+func TestSendSplitsLongMessages(t *testing.T) {
+	var mu sync.Mutex
+	var texts []string
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if err := r.ParseForm(); err != nil {
+			t.Errorf("ParseForm: %v", err)
+		}
+		mu.Lock()
+		texts = append(texts, r.PostFormValue("text"))
+		mu.Unlock()
+		w.Write([]byte(`{"ok":true}`))
+	}))
+	defer srv.Close()
+
+	line := strings.Repeat("x", 100)
+	lines := make([]string, 100)
+	for i := range lines {
+		lines[i] = line
+	}
+	text := strings.Join(lines, "\n")
+
+	tg := newTelegramAt(srv.URL, "123:abc", "42")
+	tg.backoff = time.Millisecond
+	if err := tg.Send(context.Background(), text); err != nil {
+		t.Fatalf("Send: %v", err)
+	}
+	mu.Lock()
+	defer mu.Unlock()
+	if len(texts) != 3 {
+		t.Fatalf("частей %d, ожидалось 3", len(texts))
+	}
+	for i, part := range texts {
+		if len(part) > maxMessageBytes {
+			t.Fatalf("часть %d длиннее лимита: %d", i, len(part))
+		}
+	}
+	if got := strings.Join(texts, "\n"); got != text {
+		t.Fatalf("склейка частей не даёт исходный текст")
+	}
+}

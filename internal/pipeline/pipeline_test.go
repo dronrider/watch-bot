@@ -5,6 +5,7 @@ import (
 	"io"
 	"log/slog"
 	"path/filepath"
+	"strings"
 	"testing"
 	"time"
 
@@ -49,14 +50,35 @@ func echoSource() config.Source {
 	return config.Source{Script: "testdata/echo.js", Enabled: true}
 }
 
-func TestDedupSendsOnce(t *testing.T) {
+func TestColdStartSeedsSilently(t *testing.T) {
 	notifier := &fakeNotifier{}
-	pipe, _ := newPipeline(t, notifier)
+	pipe, store := newPipeline(t, notifier)
 	ctx := context.Background()
 	pipe.Run(ctx, echoSource())
 	pipe.Run(ctx, echoSource())
+	if len(notifier.sent) != 0 {
+		t.Fatalf("холодный старт отправил %d уведомлений, ожидалось 0", len(notifier.sent))
+	}
+	known, err := store.IsKnown("echo", "echo:1")
+	if err != nil || !known {
+		t.Fatalf("событие не заложено в базу: known=%v err=%v", known, err)
+	}
+}
+
+func TestNewEventAfterSeedSendsOnce(t *testing.T) {
+	notifier := &fakeNotifier{}
+	pipe, store := newPipeline(t, notifier)
+	ctx := context.Background()
+	pipe.Run(ctx, echoSource())
+	if err := store.Set("echo", "mode", "1"); err != nil {
+		t.Fatal(err)
+	}
+	pipe.Run(ctx, echoSource())
 	if len(notifier.sent) != 1 {
-		t.Fatalf("после двух прогонов отправлено %d уведомлений, ожидалось 1", len(notifier.sent))
+		t.Fatalf("отправлено %d уведомлений, ожидалось 1", len(notifier.sent))
+	}
+	if !strings.Contains(notifier.sent[0], "Обещание сброса") {
+		t.Fatalf("в отправке нет нового события: %s", notifier.sent[0])
 	}
 }
 

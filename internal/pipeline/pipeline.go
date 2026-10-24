@@ -21,6 +21,7 @@ type Store interface {
 	MarkSeen(source, id string, at time.Time) error
 	TouchOK(source string, at time.Time) error
 	TouchEvents(source string, at time.Time) error
+	Fresh(source string) (lastOK, lastEvents time.Time, err error)
 	Get(source, key string) (string, bool, error)
 	Set(source, key, value string) error
 }
@@ -54,6 +55,12 @@ func (p *Pipeline) Run(ctx context.Context, src config.Source) {
 		log.Error("прогон адаптера", "err", err)
 		return
 	}
+	lastOK, _, err := p.Store.Fresh(name)
+	if err != nil {
+		log.Error("чтение свежести", "err", err)
+		return
+	}
+	first := lastOK.IsZero()
 	if err := p.Store.TouchOK(name, now); err != nil {
 		log.Error("отметка свежести", "err", err)
 		return
@@ -63,6 +70,19 @@ func (p *Pipeline) Run(ctx context.Context, src config.Source) {
 			log.Error("отметка свежести", "err", err)
 			return
 		}
+	}
+	if first {
+		// Холодный старт: пустая база сочла бы новыми всю историю
+		// источника, поэтому первый прогон закладывает события молча.
+		for _, e := range events {
+			if err := p.Store.MarkSeen(name, e.ID, now); err != nil {
+				log.Error("запись seen", "id", e.ID, "err", err)
+			}
+		}
+		if len(events) > 0 {
+			log.Info("первый прогон: события заложены без уведомления", "events", len(events))
+		}
+		return
 	}
 
 	fresh := make([]harness.Event, 0, len(events))

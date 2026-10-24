@@ -67,7 +67,51 @@ func newTelegramAt(apiBase, token, chatID string) *Telegram {
 	return t
 }
 
+// maxMessageBytes режет сообщения с запасом под лимит Telegram в 4096
+// «символов» UTF-16 и служебные поля запроса.
+const maxMessageBytes = 3500
+
 func (t *Telegram) Send(ctx context.Context, text string) error {
+	for _, part := range splitMessage(text) {
+		if err := t.sendPart(ctx, part); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+// splitMessage делит текст по границам строк, а строку длиннее лимита
+// режет по байтам: события в сообщении завершены построчно, поэтому части
+// остаются валидным HTML.
+func splitMessage(text string) []string {
+	if len(text) <= maxMessageBytes {
+		return []string{text}
+	}
+	var parts []string
+	var b strings.Builder
+	for _, line := range strings.Split(text, "\n") {
+		chunk := line
+		if b.Len() > 0 {
+			chunk = "\n" + line
+		}
+		if b.Len()+len(chunk) > maxMessageBytes && b.Len() > 0 {
+			parts = append(parts, b.String())
+			b.Reset()
+			chunk = line
+		}
+		for len(chunk) > maxMessageBytes {
+			parts = append(parts, chunk[:maxMessageBytes])
+			chunk = chunk[maxMessageBytes:]
+		}
+		b.WriteString(chunk)
+	}
+	if b.Len() > 0 {
+		parts = append(parts, b.String())
+	}
+	return parts
+}
+
+func (t *Telegram) sendPart(ctx context.Context, text string) error {
 	form := url.Values{}
 	form.Set("chat_id", t.chatID)
 	form.Set("text", text)
