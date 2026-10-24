@@ -9,6 +9,8 @@ import (
 	"log/slog"
 	"strings"
 	"time"
+	"unicode"
+	"unicode/utf8"
 
 	"github.com/dronrider/watch-bot/internal/config"
 	"github.com/dronrider/watch-bot/internal/harness"
@@ -104,7 +106,7 @@ func (p *Pipeline) Run(ctx context.Context, src config.Source) {
 	if len(fresh) == 0 {
 		return
 	}
-	if err := p.Notify.Send(ctx, FormatMessage(name, fresh)); err != nil {
+	if err := p.Notify.Send(ctx, FormatMessage(src, fresh)); err != nil {
 		log.Error("отправка уведомления", "err", err)
 		return
 	}
@@ -118,50 +120,112 @@ func (p *Pipeline) Run(ctx context.Context, src config.Source) {
 	log.Info("прогон", "events", len(events), "new", len(fresh))
 }
 
-// FormatMessage собирает уведомление по событиям одного прогона.
-func FormatMessage(service string, events []harness.Event) string {
+// Эмодзи уведомлений записаны эскейпами юникода: исходник держится в
+// символах клавиатуры en/ru.
+const (
+	emojiParty    = "\U0001F389" // хлопушки
+	emojiCalendar = "\U0001F4C5" // календарь
+	emojiEyes     = "\U0001F440" // глаза
+	emojiChart    = "\U0001F4C8" // растущий график
+	emojiCrystal  = "\U0001F52E" // хрустальный шар
+	emojiRobot    = "\U0001F916" // робот
+	emojiLaptop   = "\U0001F4BB" // ноутбук
+	emojiBell     = "\U0001F514" // колокольчик
+	emojiClock    = "\U0001F552" // циферблат
+	emojiLink     = "\U0001F517" // звено цепи
+	emojiInfo     = "\U0001F4AC" // облачко с репликой
+)
+
+// kindInfo это подача вида события: эмодзи, строка-заголовок и фраза,
+// объясняющая, что случилось и как на это реагировать.
+type kindInfo struct {
+	emoji  string
+	lead   string
+	action string
+}
+
+func kindText(kind string) kindInfo {
+	switch kind {
+	case "hint":
+		return kindInfo{emojiEyes, "признак скорого сброса", "Трекер заметил намёк на приближающийся сброс. Подтверждения пока нет."}
+	case "promise":
+		return kindInfo{emojiCalendar, "обещан сброс лимитов", "Сброс ещё не случился, но его пообещали. Подтверждение придёт отдельным сообщением."}
+	case "reset":
+		return kindInfo{emojiParty, "лимиты сброшены", "Лимиты обнулились, счётчик пошёл с нуля. Можно возвращаться к работе."}
+	case "limit_raise":
+		return kindInfo{emojiChart, "лимиты подняты", "Базовые лимиты стали выше, запас в работе вырос."}
+	case "forecast":
+		return kindInfo{emojiCrystal, "прогноз сброса", "Сброс спрогнозирован по накопленным сигналам. Это оценка, а не обещание."}
+	}
+	return kindInfo{emojiBell, kind, "Событие из ленты трекера."}
+}
+
+// serviceTitle превращает поле service в имя продукта и эмодзи для заголовка.
+func serviceTitle(src config.Source) (string, string) {
+	switch strings.ToLower(src.Service) {
+	case "claude":
+		return "Claude", emojiRobot
+	case "codex":
+		return "Codex", emojiLaptop
+	}
+	if src.Service != "" {
+		return src.Service, emojiBell
+	}
+	return src.Name(), emojiBell
+}
+
+// upperFirst поднимает первую букву строки, чтобы заголовок блока читался
+// самостоятельной строкой.
+func upperFirst(s string) string {
+	r, size := utf8.DecodeRuneInString(s)
+	if r == utf8.RuneError && size <= 1 {
+		return s
+	}
+	return string(unicode.ToUpper(r)) + s[size:]
+}
+
+// FormatMessage собирает уведомление по событиям одного прогона. Заголовок
+// называет продукт и главное происшествие, каждое событие объясняет, что
+// случилось и как на это реагировать.
+func FormatMessage(src config.Source, events []harness.Event) string {
+	name, product := serviceTitle(src)
 	var b strings.Builder
-	fmt.Fprintf(&b, "<b>%s</b> (%s)\n", html.EscapeString(service), plural(len(events), "новое событие", "новых события", "новых событий"))
-	for _, e := range events {
-		b.WriteString("\n<b>")
-		b.WriteString(html.EscapeString(kindTitle(e.Kind)))
-		b.WriteString("</b>: ")
-		b.WriteString(html.EscapeString(e.Title))
+	if len(events) == 1 {
+		k := kindText(events[0].Kind)
+		fmt.Fprintf(&b, "<b>%s %s: %s</b>\n", k.emoji, name, k.lead)
+	} else {
+		fmt.Fprintf(&b, "<b>%s %s: %s</b>\n", product, name, plural(len(events), "новое событие", "новых события", "новых событий"))
+	}
+	for i, e := range events {
+		k := kindText(e.Kind)
+		if i > 0 {
+			// Между событиями вставляется пустая строка, чтобы блоки
+			// читались раздельно.
+			b.WriteString("\n")
+		}
 		b.WriteString("\n")
+		if len(events) > 1 {
+			fmt.Fprintf(&b, "%s %s\n", k.emoji, upperFirst(k.lead))
+		}
+		b.WriteString(k.action)
+		b.WriteString("\n«")
+		b.WriteString(html.EscapeString(e.Title))
+		b.WriteString("»\n")
 		if t, err := time.Parse(time.RFC3339, e.Time); err == nil {
 			// Все времена приводятся к UTC, чтобы события разных источников
 			// сравнивались в одной зоне.
-			b.WriteString(t.UTC().Format("02.01.2006 15:04 UTC"))
+			b.WriteString(emojiClock + " " + t.UTC().Format("02.01.2006 15:04 UTC"))
 		} else {
-			b.WriteString(e.Time)
+			b.WriteString(emojiClock + " " + e.Time)
 		}
 		if e.URL != "" {
-			b.WriteString("\n")
-			b.WriteString(html.EscapeString(e.URL))
+			b.WriteString("\n" + emojiLink + " " + html.EscapeString(e.URL))
 		}
 		if e.Note != "" {
-			b.WriteString("\n")
-			b.WriteString(html.EscapeString(e.Note))
+			b.WriteString("\n" + emojiInfo + " " + html.EscapeString(e.Note))
 		}
-		b.WriteString("\n")
 	}
 	return strings.TrimRight(b.String(), "\n")
-}
-
-func kindTitle(kind string) string {
-	switch kind {
-	case "hint":
-		return "намёк"
-	case "promise":
-		return "обещание"
-	case "reset":
-		return "сброс"
-	case "limit_raise":
-		return "поднятие лимита"
-	case "forecast":
-		return "прогноз"
-	}
-	return kind
 }
 
 func plural(n int, one, few, many string) string {

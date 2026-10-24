@@ -22,6 +22,9 @@ type Source struct {
 	Schedule      string `toml:"schedule"`
 	FreshnessDays int    `toml:"freshness_days"`
 	Enabled       bool   `toml:"enabled"`
+	// Service это продукт источника (Claude, Codex): из него собирается
+	// заголовок уведомления. Пустое поле откатывается к имени источника.
+	Service string `toml:"service"`
 }
 
 // Name это имя источника в сообщениях, состоянии и логах. Берётся от базового

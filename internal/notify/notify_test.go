@@ -8,6 +8,7 @@ import (
 	"sync"
 	"testing"
 	"time"
+	"unicode/utf8"
 )
 
 func TestTelegramSendOK(t *testing.T) {
@@ -41,6 +42,24 @@ func TestTelegramSendOK(t *testing.T) {
 		if !strings.Contains(forms[0], want) {
 			t.Fatalf("форма без %s: %s", want, forms[0])
 		}
+	}
+}
+
+func TestSplitKeepsRunesWhole(t *testing.T) {
+	// Строка из четырёхбайных эмодзи длиннее лимита: рез обязан пройти по
+	// границе руна.
+	line := strings.Repeat("\U0001F389", 1000)
+	parts := splitMessage(line)
+	if len(parts) < 2 {
+		t.Fatalf("ожидалась резка, частей %d", len(parts))
+	}
+	for i, part := range parts {
+		if !utf8.ValidString(part) {
+			t.Fatalf("часть %d не валидный UTF-8", i)
+		}
+	}
+	if got := strings.Join(parts, ""); got != line {
+		t.Fatal("склейка частей не восстановила строку")
 	}
 }
 

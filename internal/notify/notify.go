@@ -13,6 +13,7 @@ import (
 	"os"
 	"strings"
 	"time"
+	"unicode/utf8"
 )
 
 // Notifier это канал уведомлений. Реализация одна, интерфейс держит
@@ -100,8 +101,14 @@ func splitMessage(text string) []string {
 			chunk = line
 		}
 		for len(chunk) > maxMessageBytes {
-			parts = append(parts, chunk[:maxMessageBytes])
-			chunk = chunk[maxMessageBytes:]
+			cut := maxMessageBytes
+			// Рез по границе руна: разрез внутри эмодзи оставил бы Telegram
+			// битый UTF-8.
+			for cut > 0 && !utf8.RuneStart(chunk[cut]) {
+				cut--
+			}
+			parts = append(parts, chunk[:cut])
+			chunk = chunk[cut:]
 		}
 		b.WriteString(chunk)
 	}

@@ -56,7 +56,7 @@ func TestSilentSourceNotifies(t *testing.T) {
 	if len(notifier.sent) != 1 {
 		t.Fatalf("ожидалось одно уведомление, получено %d", len(notifier.sent))
 	}
-	want := "источник молчит: clauderesets (ни одного успешного прогона), порог 3 дн."
+	want := "<b>" + emojiSiren + " clauderesets: источник молчит</b>\n\nуспешных прогонов ещё не было, порог молчания 3 дн.\nПохоже, трекер умер или сменил формат. Стоит заглянуть на сайт вручную."
 	if notifier.sent[0] != want {
 		t.Fatalf("текст: %q", notifier.sent[0])
 	}

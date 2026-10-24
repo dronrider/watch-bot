@@ -114,24 +114,66 @@ func TestFormatMessage(t *testing.T) {
 			Note:  "",
 		},
 	}
-	got := FormatMessage("clauderesets", events)
-	want := `<b>clauderesets</b> (2 новых события)
-
-<b>сброс</b>: Сброс &lt;лимитов&gt;
-20.10.2026 00:00 UTC
-https://example.test/reset
-обнуление
-
-<b>прогноз</b>: Прогноз на &lt;понедельник&gt;
-21.10.2026 09:30 UTC`
+	src := config.Source{Script: "adapters/clauderesets.js", Service: "Claude"}
+	got := FormatMessage(src, events)
+	want := strings.Join([]string{
+		"<b>" + emojiRobot + " Claude: 2 новых события</b>",
+		"",
+		emojiParty + " Лимиты сброшены",
+		"Лимиты обнулились, счётчик пошёл с нуля. Можно возвращаться к работе.",
+		"«Сброс &lt;лимитов&gt;»",
+		emojiClock + " 20.10.2026 00:00 UTC",
+		emojiLink + " https://example.test/reset",
+		emojiInfo + " обнуление",
+		"",
+		emojiCrystal + " Прогноз сброса",
+		"Сброс спрогнозирован по накопленным сигналам. Это оценка, а не обещание.",
+		"«Прогноз на &lt;понедельник&gt;»",
+		emojiClock + " 21.10.2026 09:30 UTC",
+	}, "\n")
 	if got != want {
 		t.Fatalf("формат:\nполучено:\n%s\nожидалось:\n%s", got, want)
 	}
 }
 
-func TestKindTitlesAndPlural(t *testing.T) {
-	if got := kindTitle("limit_raise"); got != "поднятие лимита" {
-		t.Fatalf("kindTitle: %s", got)
+func TestFormatMessageSingleEvent(t *testing.T) {
+	src := config.Source{Script: "adapters/codexresetdev.js", Service: "Codex"}
+	events := []harness.Event{
+		{ID: "x:1", Title: "Reset recorded", Time: "2026-10-20T15:04:00Z", Kind: "reset", URL: "https://x.test/1"},
+	}
+	got := FormatMessage(src, events)
+	want := strings.Join([]string{
+		"<b>" + emojiParty + " Codex: лимиты сброшены</b>",
+		"",
+		"Лимиты обнулились, счётчик пошёл с нуля. Можно возвращаться к работе.",
+		"«Reset recorded»",
+		emojiClock + " 20.10.2026 15:04 UTC",
+		emojiLink + " https://x.test/1",
+	}, "\n")
+	if got != want {
+		t.Fatalf("формат:\nполучено:\n%s\nожидалось:\n%s", got, want)
+	}
+}
+
+func TestFormatMessageFallsBackToSourceName(t *testing.T) {
+	src := config.Source{Script: "adapters/modelyard.js"}
+	events := []harness.Event{{ID: "x:1", Title: "Hint", Time: "2026-10-20T00:00:00Z", Kind: "hint"}}
+	got := FormatMessage(src, events)
+	want := "<b>" + emojiEyes + " modelyard: признак скорого сброса</b>\n\n" +
+		"Трекер заметил намёк на приближающийся сброс. Подтверждения пока нет.\n" +
+		"«Hint»\n" + emojiClock + " 20.10.2026 00:00 UTC"
+	if got != want {
+		t.Fatalf("формат:\nполучено:\n%s\nожидалось:\n%s", got, want)
+	}
+}
+
+func TestKindTextsAndPlural(t *testing.T) {
+	if got := kindText("limit_raise").lead; got != "лимиты подняты" {
+		t.Fatalf("kindText: %s", got)
+	}
+	// Вид вне словаря откатывается к самому себе.
+	if got := kindText("odd").lead; got != "odd" {
+		t.Fatalf("kindText вне словаря: %s", got)
 	}
 	if got := plural(1, "событие", "события", "событий"); got != "1 событие" {
 		t.Fatalf("plural 1: %s", got)

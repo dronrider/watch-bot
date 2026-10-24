@@ -14,6 +14,10 @@ import (
 
 const silentKey = "watchdog:silent_notified"
 
+// Мигалка уведомления, эскейпом юникода: исходник держится в символах
+// клавиатуры en/ru.
+const emojiSiren = "\U0001F6A8"
+
 // Store это часть состояния, которой хватает сторожу.
 type Store interface {
 	Fresh(source string) (lastOK, lastEvents time.Time, err error)
@@ -59,12 +63,10 @@ func (w *Watchdog) checkSource(ctx context.Context, src config.Source, today str
 		last = lastEvents
 	}
 	stale := last.IsZero()
-	reason := "ни одного успешного прогона"
-	if stale {
-		reason = "ни одного успешного прогона"
-	} else if w.Now().After(last.AddDate(0, 0, src.FreshnessDays)) {
+	reason := "успешных прогонов ещё не было"
+	if !stale && w.Now().After(last.AddDate(0, 0, src.FreshnessDays)) {
 		stale = true
-		reason = fmt.Sprintf("последняя активность %s", last.Format("02.01.2006"))
+		reason = fmt.Sprintf("последняя активность была %s", last.Format("02.01.2006"))
 	}
 	if !stale {
 		w.Store.Set(name, silentKey, "")
@@ -77,7 +79,7 @@ func (w *Watchdog) checkSource(ctx context.Context, src config.Source, today str
 	if found && marked == today {
 		return nil
 	}
-	text := fmt.Sprintf("источник молчит: %s (%s), порог %d дн.", name, reason, src.FreshnessDays)
+	text := fmt.Sprintf("<b>%s %s: источник молчит</b>\n\n%s, порог молчания %d дн.\nПохоже, трекер умер или сменил формат. Стоит заглянуть на сайт вручную.", emojiSiren, name, reason, src.FreshnessDays)
 	if err := w.Notify.Send(ctx, text); err != nil {
 		return err
 	}
