@@ -15,28 +15,28 @@ path = "/var/lib/resetwatch/state.db"
 kind = "telegram"
 
 # Каждый источник это скрипт в adapters/ и своё расписание.
-# schedule по умолчанию "0 */2 * * *" (раз в два часа),
+# schedule по умолчанию "*/15 * * * *" (раз в 15 минут),
 # freshness_days по умолчанию 3. service это продукт источника, из него
 # собирается заголовок уведомления (Claude, Codex); пусто = имя источника.
 
 [[source]]
 script = "adapters/clauderesets.js"
 service = "Claude"
-schedule = "0 */2 * * *"
+schedule = "*/15 * * * *"
 freshness_days = 3
 enabled = true
 
 [[source]]
 script = "adapters/modelyard.js"
 service = "Codex"
-schedule = "30 */2 * * *"
+schedule = "10/15 * * * *"
 freshness_days = 3
 enabled = true
 
 [[source]]
 script = "adapters/codexresetdev.js"
 service = "Codex"
-schedule = "15 */2 * * *"
+schedule = "5/15 * * * *"
 freshness_days = 5
 enabled = true
 

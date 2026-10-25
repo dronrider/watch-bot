@@ -11,8 +11,9 @@ import (
 	"github.com/robfig/cron/v3"
 )
 
-// DefaultSchedule подставляется источнику без своего cron-выражения: раз в два часа.
-const DefaultSchedule = "0 */2 * * *"
+// DefaultSchedule подставляется источнику без своего cron-выражения: раз в
+// 15 минут, сброс ловится в среднем через 7 минут после анонса.
+const DefaultSchedule = "*/15 * * * *"
 
 // DefaultFreshnessDays подставляется источнику без freshness_days.
 const DefaultFreshnessDays = 3
