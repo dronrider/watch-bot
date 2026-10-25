@@ -167,6 +167,74 @@ func TestFormatMessageFallsBackToSourceName(t *testing.T) {
 	}
 }
 
+func TestCrossKey(t *testing.T) {
+	cases := []struct {
+		name string
+		ev   harness.Event
+		want string
+	}{
+		{"ссылка в url", harness.Event{URL: "https://x.com/thsottiaux/status/2114237083652882932"}, "xref:2114237083652882932"},
+		{"старый домен в заметке", harness.Event{Note: "Source: https://twitter.com/thsottiaux/status/123"}, "xref:123"},
+		{"чужая ссылка", harness.Event{URL: "https://tibo.modelyard.dev/events/132"}, ""},
+		{"без ссылок", harness.Event{}, ""},
+	}
+	for _, c := range cases {
+		if got := crossKey(c.ev); got != c.want {
+			t.Fatalf("%s: %s, ожидалось %s", c.name, got, c.want)
+		}
+	}
+}
+
+func TestCrossSourceDuplicateSilenced(t *testing.T) {
+	notifier := &fakeNotifier{}
+	pipe, store := newPipeline(t, notifier)
+	ctx := context.Background()
+	first := config.Source{Script: "testdata/dupx.js", Enabled: true}
+	second := config.Source{Script: "testdata/dupx2.js", Enabled: true}
+	// Холодный старт обоих источников: ленты пустые, ключей нет.
+	pipe.Run(ctx, first)
+	pipe.Run(ctx, second)
+	if len(notifier.sent) != 0 {
+		t.Fatalf("холодный старт отправил %d уведомлений", len(notifier.sent))
+	}
+	// Свежий пост приходит в обе ленты: первый источник сообщает, второй
+	// молчит, потому что пост уже прозвучал.
+	if err := store.Set("dupx", "mode", "1"); err != nil {
+		t.Fatal(err)
+	}
+	if err := store.Set("dupx2", "mode", "1"); err != nil {
+		t.Fatal(err)
+	}
+	pipe.Run(ctx, first)
+	pipe.Run(ctx, second)
+	if len(notifier.sent) != 1 {
+		t.Fatalf("пересказ одного поста: отправлено %d уведомлений, ожидалось 1", len(notifier.sent))
+	}
+	if !strings.Contains(notifier.sent[0], "fully propagated") {
+		t.Fatalf("отправлено сообщение не первого источника: %s", notifier.sent[0])
+	}
+	// Пересказ всё равно заложен в seen: повторных попыток не будет.
+	known, err := store.IsKnown("dupx2", "dupx2:1")
+	if err != nil || !known {
+		t.Fatalf("пересказ не заложен в базу: known=%v err=%v", known, err)
+	}
+}
+
+func TestColdStartSeedsCrossKey(t *testing.T) {
+	notifier := &fakeNotifier{}
+	pipe, store := newPipeline(t, notifier)
+	if err := store.Set("dupx", "mode", "1"); err != nil {
+		t.Fatal(err)
+	}
+	pipe.Run(context.Background(), config.Source{Script: "testdata/dupx.js", Enabled: true})
+	if len(notifier.sent) != 0 {
+		t.Fatalf("холодный старт отправил %d уведомлений", len(notifier.sent))
+	}
+	if _, ok, _ := store.Get(globalSource, "xref:2114237083652882932"); !ok {
+		t.Fatal("холодный старт не заложил сквозной ключ поста")
+	}
+}
+
 func TestKindTextsAndPlural(t *testing.T) {
 	if got := kindText("limit_raise").lead; got != "лимиты подняты" {
 		t.Fatalf("kindText: %s", got)

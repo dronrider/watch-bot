@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"html"
 	"log/slog"
+	"regexp"
 	"strings"
 	"time"
 	"unicode"
@@ -80,6 +81,7 @@ func (p *Pipeline) Run(ctx context.Context, src config.Source) {
 			if err := p.Store.MarkSeen(name, e.ID, now); err != nil {
 				log.Error("запись seen", "id", e.ID, "err", err)
 			}
+			p.markCross(log, e, now)
 		}
 		if len(events) > 0 {
 			log.Info("первый прогон: события заложены без уведомления", "events", len(events))
@@ -106,18 +108,81 @@ func (p *Pipeline) Run(ctx context.Context, src config.Source) {
 	if len(fresh) == 0 {
 		return
 	}
-	if err := p.Notify.Send(ctx, FormatMessage(src, fresh)); err != nil {
+	// Сквозной дедуп: трекеры пересказывают одни и те же посты, и пересказ
+	// уже сообщённого поста молчит. Холодный старт закладывает ключи так же
+	// молча, поэтому история другого источника не приходит сообщением.
+	var send []harness.Event
+	reported := map[string]bool{}
+	for _, e := range fresh {
+		key := crossKey(e)
+		if key != "" {
+			if reported[key] {
+				if err := p.Store.MarkSeen(name, e.ID, now); err != nil {
+					log.Error("запись seen", "id", e.ID, "err", err)
+				}
+				log.Info("пост дважды в прогоне, второй пересказ молчит", "id", e.ID)
+				continue
+			}
+			_, known, err := p.Store.Get(globalSource, key)
+			if err != nil {
+				log.Error("чтение сквозного дедупа", "key", key, "err", err)
+			} else if known {
+				if err := p.Store.MarkSeen(name, e.ID, now); err != nil {
+					log.Error("запись seen", "id", e.ID, "err", err)
+				}
+				log.Info("пост уже сообщён другим источником, пересказ молчит", "id", e.ID)
+				continue
+			}
+			reported[key] = true
+		}
+		send = append(send, e)
+	}
+	if len(send) == 0 {
+		return
+	}
+	if err := p.Notify.Send(ctx, FormatMessage(src, send)); err != nil {
 		log.Error("отправка уведомления", "err", err)
 		return
 	}
 	// Событие помечается после отправки: упавшая отправка оставит его
 	// новым, и следующий прогон попробует снова.
-	for _, e := range fresh {
+	for _, e := range send {
 		if err := p.Store.MarkSeen(name, e.ID, now); err != nil {
 			log.Error("запись seen", "id", e.ID, "err", err)
 		}
+		p.markCross(log, e, now)
 	}
-	log.Info("прогон", "events", len(events), "new", len(fresh))
+	log.Info("прогон", "events", len(events), "new", len(send))
+}
+
+// globalSource это псевдоисточник для сквозных ключей: записи, общие всем
+// источникам сразу, а не одному.
+const globalSource = ""
+
+// statusLink ловит ссылку на пост в X: она исходник для трекеров, и два
+// трекера, пересказывающие один пост, это одно событие.
+var statusLink = regexp.MustCompile(`https?://(?:www\.)?(?:x|twitter)\.com/[A-Za-z0-9_]{1,20}/status/(\d+)`)
+
+// crossKey даёт сквозной ключ события по ссылке на пост в URL или заметке.
+// Пустой ключ значит, что событие ни на какой пост не ссылается.
+func crossKey(e harness.Event) string {
+	for _, text := range []string{e.URL, e.Note} {
+		if m := statusLink.FindStringSubmatch(text); m != nil {
+			return "xref:" + m[1]
+		}
+	}
+	return ""
+}
+
+// markCross закладывает сквозной ключ события, если событие ссылается на пост.
+func (p *Pipeline) markCross(log *slog.Logger, e harness.Event, now time.Time) {
+	key := crossKey(e)
+	if key == "" {
+		return
+	}
+	if err := p.Store.Set(globalSource, key, now.Format(time.RFC3339)); err != nil {
+		log.Error("запись сквозного дедупа", "key", key, "err", err)
+	}
 }
 
 // Эмодзи уведомлений записаны эскейпами юникода: исходник держится в
