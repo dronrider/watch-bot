@@ -20,6 +20,7 @@ func TestAdapterGolden(t *testing.T) {
 		script   string
 		url      string
 		snapshot string
+		state    map[string]string
 	}{
 		{
 			name:     "clauderesets",
@@ -39,6 +40,21 @@ func TestAdapterGolden(t *testing.T) {
 			url:      "https://codexreset.dev/api/history",
 			snapshot: "../../testdata/snapshots/codexresetdev.api.json",
 		},
+		{
+			// Слепок боевой выдачи 2026-10-27: сброс в 10:50 UTC при
+			// прошлом 06:06 2026-10-25, категория 24 ч ушла в низкий,
+			// 48 ч выросла до среднего.
+			name:     "codexresetorg",
+			script:   "../../adapters/codexresetorg.js",
+			url:      "https://codexreset.org/",
+			snapshot: "../../testdata/snapshots/codexresetorg.html",
+			state: map[string]string{
+				"last_reset": "2026-10-25T06:06:16.000Z",
+				"last_post":  "https://x.com/thsottiaux/status/2114237083652882932",
+				"f24":        "medium",
+				"f48":        "low",
+			},
+		},
 	}
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
@@ -51,10 +67,14 @@ func TestAdapterGolden(t *testing.T) {
 			}
 			httpFake := &fakeHTTP{pages: pages}
 			rss := NewRealRSS(httpFake)
+			state := newFakeState()
+			for k, v := range tc.state {
+				state.values[k] = v
+			}
 			deps := Deps{
 				HTTP:  httpFake,
 				RSS:   rss,
-				State: newFakeState(),
+				State: state,
 				Log:   quietLog(),
 			}
 			events, err := Run(context.Background(), tc.script, deps)

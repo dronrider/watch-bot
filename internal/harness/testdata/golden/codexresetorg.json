@@ -1,0 +1,26 @@
+[
+  {
+    "id": "codexresetorg:reset:2026-10-27T10:50:27.421Z",
+    "title": "Сброс лимитов в 10:50 UTC",
+    "time": "2026-10-27T10:50:27.421Z",
+    "kind": "reset",
+    "url": "https://x.com/thsottiaux/status/2114588174249071102",
+    "note": "Точное время последнего сброса с главной codexreset.org. Подтверждено постом в X."
+  },
+  {
+    "id": "codexresetorg:forecast-24h:low",
+    "title": "Прогноз на 24 часа стал низким (29%)",
+    "time": "2026-10-27T10:50:27.421Z",
+    "kind": "forecast",
+    "url": "https://codexreset.org/",
+    "note": "Категория сменилась со среднего на низкий. Панель на сайте помечена experimental."
+  },
+  {
+    "id": "codexresetorg:forecast-48h:medium",
+    "title": "Прогноз на 48 часов стал средним (50%)",
+    "time": "2026-10-27T10:50:27.421Z",
+    "kind": "forecast",
+    "url": "https://codexreset.org/",
+    "note": "Категория сменилась с низкого на средний. Панель на сайте помечена experimental."
+  }
+]
