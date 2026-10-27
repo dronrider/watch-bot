@@ -8,6 +8,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"net/url"
 	"os"
@@ -23,38 +24,56 @@ type Notifier interface {
 }
 
 const (
-	envToken  = "RESETWATCH_BOT_TOKEN"
-	envChatID = "RESETWATCH_BOT_CHAT_ID"
+	envToken   = "RESETWATCH_BOT_TOKEN"
+	envChatIDs = "RESETWATCH_BOT_CHAT_IDS"
+	envChatID  = "RESETWATCH_BOT_CHAT_ID"
 )
 
 // TelegramFromEnv собирает клиента из переменных окружения: токен и chat id
-// не ездят в конфиге и в базе.
+// не ездят в конфиге и в базе. Список получателей берётся из RESETWATCH_BOT_CHAT_IDS,
+// старая переменная с единственным чатом продолжает работать.
 func TelegramFromEnv() (*Telegram, error) {
 	token := os.Getenv(envToken)
 	if token == "" {
 		return nil, fmt.Errorf("нет %s", envToken)
 	}
-	chatID := os.Getenv(envChatID)
-	if chatID == "" {
-		return nil, fmt.Errorf("нет %s", envChatID)
+	raw := os.Getenv(envChatIDs)
+	if raw == "" {
+		raw = os.Getenv(envChatID)
 	}
-	return NewTelegram(token, chatID), nil
+	chatIDs := parseChatIDs(raw)
+	if len(chatIDs) == 0 {
+		return nil, fmt.Errorf("нет %s и %s", envChatIDs, envChatID)
+	}
+	return NewTelegram(token, chatIDs...), nil
+}
+
+// parseChatIDs разбирает список получателей через запятую, пустые элементы
+// выкидываются.
+func parseChatIDs(raw string) []string {
+	var ids []string
+	for _, part := range strings.Split(raw, ",") {
+		if id := strings.TrimSpace(part); id != "" {
+			ids = append(ids, id)
+		}
+	}
+	return ids
 }
 
 type Telegram struct {
 	apiBase string
 	token   string
-	chatID  string
+	chatIDs []string
 	client  *http.Client
 	retries int
 	backoff time.Duration
 }
 
-func NewTelegram(token, chatID string) *Telegram {
+func NewTelegram(token string, chatIDs ...string) *Telegram {
 	return &Telegram{
 		apiBase: "https://api.telegram.org",
 		token:   token,
-		chatID:  chatID,
+		chatIDs: chatIDs,
 		client:  &http.Client{},
 		retries: 3,
 		backoff: 2 * time.Second,
@@ -62,8 +81,8 @@ func NewTelegram(token, chatID string) *Telegram {
 }
 
 // newTelegramAt нужен тестам: base URL подменяется на локальный сервер.
-func newTelegramAt(apiBase, token, chatID string) *Telegram {
-	t := NewTelegram(token, chatID)
+func newTelegramAt(apiBase, token string, chatIDs ...string) *Telegram {
+	t := NewTelegram(token, chatIDs...)
 	t.apiBase = apiBase
 	return t
 }
@@ -72,11 +91,23 @@ func newTelegramAt(apiBase, token, chatID string) *Telegram {
 // «символов» UTF-16 и служебные поля запроса.
 const maxMessageBytes = 3500
 
+// Send обходит всех получателей: неудача одному адресату пишется в журнал
+// и не отменяет остальных. Ошибку наверх возвращает только полный провал,
+// когда сообщения не дошли никому.
 func (t *Telegram) Send(ctx context.Context, text string) error {
-	for _, part := range splitMessage(text) {
-		if err := t.sendPart(ctx, part); err != nil {
-			return err
+	parts := splitMessage(text)
+	failed := 0
+	for _, chatID := range t.chatIDs {
+		for _, part := range parts {
+			if err := t.sendPart(ctx, chatID, part); err != nil {
+				log.Printf("уведомление в чат %s не дошло: %v", chatID, err)
+				failed++
+				break
+			}
 		}
+	}
+	if failed == len(t.chatIDs) {
+		return fmt.Errorf("sendMessage: не дошло ни одному из %d получателей", len(t.chatIDs))
 	}
 	return nil
 }
@@ -118,9 +149,9 @@ func splitMessage(text string) []string {
 	return parts
 }
 
-func (t *Telegram) sendPart(ctx context.Context, text string) error {
+func (t *Telegram) sendPart(ctx context.Context, chatID, text string) error {
 	form := url.Values{}
-	form.Set("chat_id", t.chatID)
+	form.Set("chat_id", chatID)
 	form.Set("text", text)
 	form.Set("parse_mode", "HTML")
 	endpoint := fmt.Sprintf("%s/bot%s/sendMessage", t.apiBase, t.token)

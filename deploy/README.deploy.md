@@ -24,7 +24,8 @@
    сделать исполняемым.
 
 3. Окружение. /opt/resetwatch/resetwatch.env с двумя строками:
-   RESETWATCH_BOT_TOKEN и RESETWATCH_BOT_CHAT_ID. Файл держать под
+   RESETWATCH_BOT_TOKEN и RESETWATCH_BOT_CHAT_IDS с получателями через
+   запятую (вместо неё работает старая RESETWATCH_BOT_CHAT_ID). Файл держать под
    root:root с правами 600: systemd читает его до сброса прав на
    пользователя сервиса, а значения не должны быть доступны никому
    лишнему. Значения в чаты и командные строки не копируются.

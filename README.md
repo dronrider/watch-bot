@@ -15,7 +15,7 @@
 2. Положить конфиг из примера и задать окружение бота:
 
        cp configs/config.example.toml configs/config.toml
-       export RESETWATCH_BOT_TOKEN=... RESETWATCH_BOT_CHAT_ID=...
+       export RESETWATCH_BOT_TOKEN=... RESETWATCH_BOT_CHAT_IDS=...,...
 
 3. Запустить:
 
@@ -41,5 +41,7 @@
   слепки боевой выдачи для golden-тестов.
 
 Секреты не пишутся в конфиг: бот читает `RESETWATCH_BOT_TOKEN` и
-`RESETWATCH_BOT_CHAT_ID` из окружения. Развёртывание на сервере описано
+`RESETWATCH_BOT_CHAT_IDS` из окружения, в последней через запятую
+перечислены получатели уведомлений. Старая `RESETWATCH_BOT_CHAT_ID`
+с единственным чатом продолжает работать как запасная. Развёртывание на сервере описано
 в `deploy/README.deploy.md`.

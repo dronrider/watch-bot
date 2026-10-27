@@ -4,7 +4,7 @@
 # Секреты в конфиге не живут: бот Telegram берёт токен и chat id из
 # окружения (файл окружения для systemd в deploy/resetwatch.env.example):
 #   RESETWATCH_BOT_TOKEN     токен бота
-#   RESETWATCH_BOT_CHAT_ID   chat id получателя
+#   RESETWATCH_BOT_CHAT_IDS  chat id получателей через запятую
 
 [state]
 # SQLite-файл состояния: дедуп событий, ключи адаптеров, свежесть.

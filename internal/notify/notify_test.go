@@ -133,3 +133,90 @@ func TestSendSplitsLongMessages(t *testing.T) {
 		t.Fatalf("склейка частей не даёт исходный текст")
 	}
 }
+
+func TestParseChatIDs(t *testing.T) {
+	cases := []struct {
+		raw  string
+		want []string
+	}{
+		{"42", []string{"42"}},
+		{"42, 100 ,200", []string{"42", "100", "200"}},
+		{"42,,  ,100,", []string{"42", "100"}},
+		{"  ", nil},
+		{"", nil},
+	}
+	for _, c := range cases {
+		got := parseChatIDs(c.raw)
+		if len(got) != len(c.want) {
+			t.Fatalf("parseChatIDs(%q) = %v, ожидалось %v", c.raw, got, c.want)
+		}
+		for i := range got {
+			if got[i] != c.want[i] {
+				t.Fatalf("parseChatIDs(%q) = %v, ожидалось %v", c.raw, got, c.want)
+			}
+		}
+	}
+}
+
+func TestTelegramFromEnvList(t *testing.T) {
+	t.Setenv(envToken, "123:abc")
+	t.Setenv(envChatID, "42")
+	t.Setenv(envChatIDs, "42,100")
+	tg, err := TelegramFromEnv()
+	if err != nil {
+		t.Fatalf("TelegramFromEnv: %v", err)
+	}
+	if len(tg.chatIDs) != 2 || tg.chatIDs[0] != "42" || tg.chatIDs[1] != "100" {
+		t.Fatalf("получатели %v, ожидались [42 100]", tg.chatIDs)
+	}
+	t.Setenv(envChatIDs, "")
+	tg, err = TelegramFromEnv()
+	if err != nil {
+		t.Fatalf("TelegramFromEnv со старой переменной: %v", err)
+	}
+	if len(tg.chatIDs) != 1 || tg.chatIDs[0] != "42" {
+		t.Fatalf("получатели %v, ожидался [42]", tg.chatIDs)
+	}
+}
+
+func TestSendContinuesAfterRecipientFailure(t *testing.T) {
+	var mu sync.Mutex
+	var seen []string
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if err := r.ParseForm(); err != nil {
+			t.Errorf("ParseForm: %v", err)
+		}
+		mu.Lock()
+		seen = append(seen, r.PostFormValue("chat_id"))
+		mu.Unlock()
+		if r.PostFormValue("chat_id") == "100" {
+			w.WriteHeader(http.StatusForbidden)
+			w.Write([]byte(`{"ok":false,"error_code":403,"description":"bot was blocked by the user"}`))
+			return
+		}
+		w.Write([]byte(`{"ok":true}`))
+	}))
+	defer srv.Close()
+
+	tg := newTelegramAt(srv.URL, "123:abc", "100", "200")
+	tg.backoff = time.Millisecond
+	if err := tg.Send(context.Background(), "текст"); err != nil {
+		t.Fatalf("сбой одного адресата не должен ронять Send: %v", err)
+	}
+	mu.Lock()
+	defer mu.Unlock()
+	attempts100, attempts200 := 0, 0
+	for _, id := range seen {
+		if id == "100" {
+			attempts100++
+		} else {
+			attempts200++
+		}
+	}
+	if attempts100 != tg.retries {
+		t.Fatalf("сбойному получателю %d запросов, ожидалось %d попыток", attempts100, tg.retries)
+	}
+	if attempts200 != 1 {
+		t.Fatalf("живому получателю %d запросов, ожидался один", attempts200)
+	}
+}
