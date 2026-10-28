@@ -1,7 +1,9 @@
 package notify
 
 import (
+	"bytes"
 	"context"
+	"log/slog"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -218,5 +220,24 @@ func TestSendContinuesAfterRecipientFailure(t *testing.T) {
 	}
 	if attempts200 != 1 {
 		t.Fatalf("живому получателю %d запросов, ожидался один", attempts200)
+	}
+}
+
+func TestSendLogsThroughField(t *testing.T) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		w.WriteHeader(http.StatusForbidden)
+		w.Write([]byte(`{"ok":false,"error_code":403,"description":"bot was blocked by the user"}`))
+	}))
+	defer srv.Close()
+
+	var buf bytes.Buffer
+	tg := newTelegramAt(srv.URL, "123:abc", "42")
+	tg.backoff = time.Millisecond
+	tg.Log = slog.New(slog.NewTextHandler(&buf, nil))
+	if err := tg.Send(context.Background(), "текст"); err == nil {
+		t.Fatal("ожидалась ошибка, когда не дошёл единственный получатель")
+	}
+	if !strings.Contains(buf.String(), "уведомление не дошло") {
+		t.Fatalf("журнал без записи о недоставке: %s", buf.String())
 	}
 }

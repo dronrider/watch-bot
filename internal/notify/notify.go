@@ -8,7 +8,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"log"
+	"log/slog"
 	"net/http"
 	"net/url"
 	"os"
@@ -67,6 +67,7 @@ type Telegram struct {
 	client  *http.Client
 	retries int
 	backoff time.Duration
+	Log     *slog.Logger
 }
 
 func NewTelegram(token string, chatIDs ...string) *Telegram {
@@ -100,7 +101,7 @@ func (t *Telegram) Send(ctx context.Context, text string) error {
 	for _, chatID := range t.chatIDs {
 		for _, part := range parts {
 			if err := t.sendPart(ctx, chatID, part); err != nil {
-				log.Printf("уведомление в чат %s не дошло: %v", chatID, err)
+				t.log().Warn("уведомление не дошло", "chat", chatID, "err", err)
 				failed++
 				break
 			}
@@ -110,6 +111,13 @@ func (t *Telegram) Send(ctx context.Context, text string) error {
 		return fmt.Errorf("sendMessage: не дошло ни одному из %d получателей", len(t.chatIDs))
 	}
 	return nil
+}
+
+func (t *Telegram) log() *slog.Logger {
+	if t.Log != nil {
+		return t.Log
+	}
+	return slog.Default()
 }
 
 // splitMessage делит текст по границам строк, а строку длиннее лимита

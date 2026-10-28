@@ -47,6 +47,7 @@ func run(configPath string, once bool, log *slog.Logger) error {
 	if err != nil {
 		return err
 	}
+	notifier.Log = log
 	store, err := state.Open(cfg.State.Path)
 	if err != nil {
 		return err
