@@ -8,7 +8,7 @@
     "note": "Точное время последнего сброса с главной codexreset.org. Подтверждено постом в X."
   },
   {
-    "id": "codexresetorg:forecast-24h:low",
+    "id": "codexresetorg:forecast-24h:medium\u003elow:1",
     "title": "Прогноз на 24 часа стал низким (29%)",
     "time": "2026-10-27T10:50:27.421Z",
     "kind": "forecast",
@@ -16,7 +16,7 @@
     "note": "Категория сменилась со среднего на низкий. Панель на сайте помечена experimental."
   },
   {
-    "id": "codexresetorg:forecast-48h:medium",
+    "id": "codexresetorg:forecast-48h:low\u003emedium:1",
     "title": "Прогноз на 48 часов стал средним (50%)",
     "time": "2026-10-27T10:50:27.421Z",
     "kind": "forecast",

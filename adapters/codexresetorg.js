@@ -2,11 +2,14 @@
 // одностраничник без API и фида, время последнего сброса стоит в теге time с
 // data-testid="reset-exact-time" и атрибутом dateTime, оценки сброса на 24 и
 // 48 часов в панелях probability-ring-24h/-48h с процентом в data-target-value.
-// Категория это бакет процента (low ниже 40, medium до 70, дальше high):
-// событием становится смена якоря или категории, колебания процента внутри
-// категории молчат. Прошлые значения лежат в kv (last_reset, last_post,
-// f24, f48), первый прогон закладывает якоря молча. Пропавшая вёрстка не
-// трогает kv и пишет причину в лог хоста.
+// Подтверждение сброса это карточка в календаре: article с
+// data-testid="calendar-event" и заголовком Confirmed, ссылка на пост в X
+// берётся только из неё, прочие ссылки на статусы и карточки-подсказки
+// молчат. Категория это бакет процента (low ниже 40, medium до 70, дальше
+// high): событием становится смена якоря или категории, колебания процента
+// внутри категории молчат. Прошлые значения лежат в kv (last_reset,
+// last_post, f24, f48, f24n, f48n), первый прогон закладывает якоря молча.
+// Пропавшая вёрстка не трогает kv и пишет причину в лог хоста.
 
 var pageURL = "https://codexreset.org/";
 var postLink = /href="(https:\/\/x\.com\/[A-Za-z0-9_]{1,20}\/status\/\d+)"/;
@@ -30,7 +33,7 @@ function collect() {
     if (resetAt === null) {
         log("codexreset.org: тег времени не найден, вёрстка могла смениться");
     }
-    var post = firstPostLink(html);
+    var post = confirmedPostLink(html);
     if (post === "") {
         log("codexreset.org: пост в X на странице не найден");
     }
@@ -76,7 +79,10 @@ function collectReset(events, resetAt, post) {
 }
 
 // Событие смены категории прогноза одной из панелей. Времени у панели нет,
-// поэтому событие берёт отметку состояния страницы из якоря сброса.
+// поэтому событие берёт отметку состояния страницы из якоря сброса. В id
+// едут переход категории и номер смены из kv: seen-дедуп хоста вечный, и
+// id по одной категории или по одному переходу заглушит второй проход
+// того же цикла low -> medium -> low.
 function collectForecast(events, resetAt, html, panel, kvKey) {
     var pct = panelPercent(html, panel);
     if (pct === null) {
@@ -93,8 +99,10 @@ function collectForecast(events, resetAt, html, panel, kvKey) {
     if (cat === prev) {
         return;
     }
+    var seq = state.get(kvKey + "n");
+    var n = seq === null ? 1 : parseInt(seq, 10) + 1;
     events.push({
-        id: "codexresetorg:forecast-" + panel + ":" + cat,
+        id: "codexresetorg:forecast-" + panel + ":" + prev + ">" + cat + ":" + n,
         title: "Прогноз на " + hoursWord[panel] + " стал " + catText[cat].ins + " (" + pct + "%)",
         time: resetAt,
         kind: "forecast",
@@ -103,6 +111,7 @@ function collectForecast(events, resetAt, html, panel, kvKey) {
             " на " + catText[cat].nom + ". Панель на сайте помечена experimental."
     });
     state.set(kvKey, cat);
+    state.set(kvKey + "n", String(n));
 }
 
 function resetTime(html) {
@@ -114,12 +123,28 @@ function resetTime(html) {
     return d === null ? null : d[1];
 }
 
-// Пост в X берётся из первого href на статус: карточка подтверждения это
-// единственная ссылка на пост в отрендеренной разметке, сериализованное
-// состояние фреймворка регулярному разбору не поддаётся.
-function firstPostLink(html) {
-    var m = html.match(postLink);
-    return m === null ? "" : m[1];
+// Пост в X берётся из карточки подтверждения в календаре: article с
+// data-testid="calendar-event", чей заголовок начинается с Confirmed.
+// Первой ссылкой на статус в документе бывает карточка-подсказка вроде
+// Signal или ссылка в новом блоке до календаря, поэтому срез по всей
+// странице молча подменял бы пост подтверждения чужим.
+function confirmedPostLink(html) {
+    var parts = html.split('data-testid="calendar-event"');
+    for (var i = 1; i < parts.length; i++) {
+        var card = parts[i];
+        var end = card.indexOf("</article>");
+        if (end !== -1) {
+            card = card.substring(0, end);
+        }
+        if (!/^>[^<]*<p[^>]*>Confirmed/.test(card)) {
+            continue;
+        }
+        var m = card.match(postLink);
+        if (m !== null) {
+            return m[1];
+        }
+    }
+    return "";
 }
 
 function panelPercent(html, panel) {
