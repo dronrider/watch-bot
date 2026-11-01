@@ -1,5 +1,5 @@
-// Уведомления. Отправка не обязана проходить с первого раза: ошибка
-// повторяется с бэкоффом и в крайнем случае возвращается вызывающему,
+// Уведомления и бот подписки. Отправка не обязана проходить с первого раза:
+// ошибка повторяется с бэкоффом и в крайнем случае возвращается вызывающему,
 // чтобы уронить его цикл.
 package notify
 
@@ -61,44 +61,49 @@ func parseChatIDs(raw string) []string {
 }
 
 type Telegram struct {
-	apiBase string
-	token   string
+	api
 	chatIDs []string
-	client  *http.Client
-	retries int
-	backoff time.Duration
-	Log     *slog.Logger
+	// Subs подаёт подписчиков команды /start сверх списка из env, поле
+	// необязательное.
+	Subs Subscriptions
+	Log  *slog.Logger
 }
 
 func NewTelegram(token string, chatIDs ...string) *Telegram {
 	return &Telegram{
-		apiBase: "https://api.telegram.org",
-		token:   token,
+		api:     newAPI("https://api.telegram.org", token),
 		chatIDs: chatIDs,
-		client:  &http.Client{},
-		retries: 3,
-		backoff: 2 * time.Second,
 	}
 }
 
 // newTelegramAt нужен тестам: base URL подменяется на локальный сервер.
 func newTelegramAt(apiBase, token string, chatIDs ...string) *Telegram {
 	t := NewTelegram(token, chatIDs...)
-	t.apiBase = apiBase
+	t.api.apiBase = apiBase
 	return t
+}
+
+// Subscriptions хранит подписки получателей: рассылка дополняет ими список
+// из env, бот записывает сюда команды /start и /stop.
+type Subscriptions interface {
+	Subscribe(chatID string, at time.Time) (added bool, err error)
+	Unsubscribe(chatID string) (removed bool, err error)
+	SubscriberIDs() ([]string, error)
 }
 
 // maxMessageBytes режет сообщения с запасом под лимит Telegram в 4096
 // «символов» UTF-16 и служебные поля запроса.
 const maxMessageBytes = 3500
 
-// Send обходит всех получателей: неудача одному адресату пишется в журнал
-// и не отменяет остальных. Ошибку наверх возвращает только полный провал,
-// когда сообщения не дошли никому.
+// Send обходит всех получателей: чаты из env плюс активные подписчики,
+// неудача одному адресату пишется в журнал с chat id и не отменяет остальных.
+// Ошибку наверх возвращает только полный провал, когда сообщения не дошли
+// никому.
 func (t *Telegram) Send(ctx context.Context, text string) error {
+	chatIDs := t.recipients()
 	parts := splitMessage(text)
 	failed := 0
-	for _, chatID := range t.chatIDs {
+	for _, chatID := range chatIDs {
 		for _, part := range parts {
 			if err := t.sendPart(ctx, chatID, part); err != nil {
 				t.log().Warn("уведомление не дошло", "chat", chatID, "err", err)
@@ -107,10 +112,37 @@ func (t *Telegram) Send(ctx context.Context, text string) error {
 			}
 		}
 	}
-	if failed == len(t.chatIDs) {
-		return fmt.Errorf("sendMessage: не дошло ни одному из %d получателей", len(t.chatIDs))
+	if failed == len(chatIDs) {
+		return fmt.Errorf("sendMessage: не дошло ни одному из %d получателей", len(chatIDs))
 	}
 	return nil
+}
+
+// recipients объединяет чаты из env с активными подписчиками: подписка через
+// /start работает без правки окружения, повторяющиеся адреса сходятся в один.
+// Сбой чтения подписок не глушит рассылку по списку из env.
+func (t *Telegram) recipients() []string {
+	ids := make([]string, len(t.chatIDs))
+	copy(ids, t.chatIDs)
+	if t.Subs == nil {
+		return ids
+	}
+	subs, err := t.Subs.SubscriberIDs()
+	if err != nil {
+		t.log().Warn("чтение подписок не удалось", "err", err)
+		return ids
+	}
+	seen := make(map[string]bool, len(ids)+len(subs))
+	for _, id := range ids {
+		seen[id] = true
+	}
+	for _, id := range subs {
+		if !seen[id] {
+			seen[id] = true
+			ids = append(ids, id)
+		}
+	}
+	return ids
 }
 
 func (t *Telegram) log() *slog.Logger {
@@ -162,63 +194,91 @@ func (t *Telegram) sendPart(ctx context.Context, chatID, text string) error {
 	form.Set("chat_id", chatID)
 	form.Set("text", text)
 	form.Set("parse_mode", "HTML")
-	endpoint := fmt.Sprintf("%s/bot%s/sendMessage", t.apiBase, t.token)
+	_, err := t.call(ctx, "sendMessage", form)
+	return err
+}
+
+// api это клиент Telegram Bot API: адрес, токен и повторы общие у рассылки
+// уведомлений и бота подписок.
+type api struct {
+	apiBase string
+	token   string
+	client  *http.Client
+	retries int
+	backoff time.Duration
+}
+
+func newAPI(apiBase, token string) api {
+	return api{
+		apiBase: apiBase,
+		token:   token,
+		client:  &http.Client{},
+		retries: 3,
+		backoff: 2 * time.Second,
+	}
+}
+
+// call дергает метод API с повторами и бэкоффом: сетевой сбой и ответ 5xx
+// повторяются, отказ бота и отмена контекста нет.
+func (a api) call(ctx context.Context, method string, form url.Values) ([]byte, error) {
+	endpoint := fmt.Sprintf("%s/bot%s/%s", a.apiBase, a.token, method)
 
 	var lastErr error
-	for attempt := 0; attempt < t.retries; attempt++ {
+	for attempt := 0; attempt < a.retries; attempt++ {
 		if attempt > 0 {
 			select {
 			case <-ctx.Done():
-				return ctx.Err()
-			case <-time.After(t.backoff * time.Duration(attempt)):
+				return nil, ctx.Err()
+			case <-time.After(a.backoff * time.Duration(attempt)):
 			}
 		}
-		err := t.once(ctx, endpoint, form)
+		body, err := a.once(ctx, method, endpoint, form)
 		if err == nil {
-			return nil
+			return body, nil
 		}
 		lastErr = err
 		if !retryable(err) {
-			return err
+			return nil, err
 		}
 	}
-	return fmt.Errorf("sendMessage после %d попыток: %w", t.retries, lastErr)
+	return nil, fmt.Errorf("%s после %d попыток: %w", method, a.retries, lastErr)
 }
 
-func (t *Telegram) once(ctx context.Context, endpoint string, form url.Values) error {
+func (a api) once(ctx context.Context, method, endpoint string, form url.Values) ([]byte, error) {
 	req, err := http.NewRequestWithContext(ctx, http.MethodPost, endpoint, strings.NewReader(form.Encode()))
 	if err != nil {
-		return err
+		return nil, err
 	}
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
-	resp, err := t.client.Do(req)
+	resp, err := a.client.Do(req)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	defer resp.Body.Close()
 	body, err := io.ReadAll(io.LimitReader(resp.Body, 1<<20))
 	if err != nil {
-		return err
+		return nil, err
 	}
 	if resp.StatusCode >= 500 || resp.StatusCode == http.StatusTooManyRequests {
-		return &apiError{status: resp.StatusCode, body: string(body)}
+		return nil, &apiError{method: method, status: resp.StatusCode, body: string(body)}
 	}
 	if resp.StatusCode != 200 {
-		return fmt.Errorf("sendMessage: ответ %d: %s", resp.StatusCode, strings.TrimSpace(string(body)))
+		return nil, fmt.Errorf("%s: ответ %d: %s", method, resp.StatusCode, strings.TrimSpace(string(body)))
 	}
 	if !strings.Contains(string(body), `"ok":true`) {
-		return fmt.Errorf("sendMessage: telegram отказал: %s", strings.TrimSpace(string(body)))
+		return nil, fmt.Errorf("%s: telegram отказал: %s", method, strings.TrimSpace(string(body)))
 	}
-	return nil
+	return body, nil
 }
 
 type apiError struct {
+	method string
 	status int
 	body   string
 }
 
 func (e *apiError) Error() string {
-	return fmt.Sprintf("sendMessage: ответ %d: %s", e.status, strings.TrimSpace(e.body))
+	return fmt.Sprintf("%s: ответ %d: %s", e.method, e.status, strings.TrimSpace(e.body))
 }
 
 func retryable(err error) bool {

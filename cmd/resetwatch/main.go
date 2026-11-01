@@ -53,6 +53,8 @@ func run(configPath string, once bool, log *slog.Logger) error {
 		return err
 	}
 	defer store.Close()
+	// Подписчики команды /start дополняют список из env при каждой отправке.
+	notifier.Subs = store
 
 	httpClient := harness.NewRealHTTP()
 	pipe := &pipeline.Pipeline{
@@ -109,10 +111,22 @@ func run(configPath string, once bool, log *slog.Logger) error {
 	}
 
 	scheduler.Start()
+
+	// Бот подписок живёт вместе с планировщиком: /start и /stop меняют
+	// список получателей без правки env и рестарта.
+	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
+	defer stop()
+	bot := notifier.Bot(store)
+	bot.Log = log
+	botDone := make(chan struct{})
+	go func() {
+		defer close(botDone)
+		bot.Run(ctx)
+	}()
+
 	log.Info("запуск", "config", configPath, "sources", len(cfg.Sources))
-	sig := make(chan os.Signal, 1)
-	signal.Notify(sig, syscall.SIGINT, syscall.SIGTERM)
-	<-sig
+	<-ctx.Done()
 	<-scheduler.Stop().Done()
+	<-botDone
 	return nil
 }

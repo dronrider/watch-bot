@@ -223,6 +223,83 @@ func TestSendContinuesAfterRecipientFailure(t *testing.T) {
 	}
 }
 
+func TestSendMergesSubscribers(t *testing.T) {
+	var mu sync.Mutex
+	var seen []string
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if err := r.ParseForm(); err != nil {
+			t.Errorf("ParseForm: %v", err)
+		}
+		mu.Lock()
+		seen = append(seen, r.PostFormValue("chat_id"))
+		mu.Unlock()
+		w.Write([]byte(`{"ok":true}`))
+	}))
+	defer srv.Close()
+
+	// Чат 42 есть и в env, и в подписках: копия должна уйти одна.
+	tg := newTelegramAt(srv.URL, "123:abc", "42")
+	tg.Subs = &memSubs{subs: []string{"100", "42"}}
+	tg.backoff = time.Millisecond
+	if err := tg.Send(context.Background(), "текст"); err != nil {
+		t.Fatalf("Send: %v", err)
+	}
+	mu.Lock()
+	defer mu.Unlock()
+	if len(seen) != 2 {
+		t.Fatalf("адресаты %v, ожидались 42 и 100 по одному разу", seen)
+	}
+	for _, id := range seen {
+		if id != "42" && id != "100" {
+			t.Fatalf("лишний адресат %s", id)
+		}
+	}
+}
+
+func TestSendSurvivesSubscriberFailure(t *testing.T) {
+	var mu sync.Mutex
+	var seen []string
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if err := r.ParseForm(); err != nil {
+			t.Errorf("ParseForm: %v", err)
+		}
+		id := r.PostFormValue("chat_id")
+		mu.Lock()
+		seen = append(seen, id)
+		mu.Unlock()
+		if id == "-100" {
+			w.WriteHeader(http.StatusForbidden)
+			w.Write([]byte(`{"ok":false,"error_code":403,"description":"bot was blocked by the user"}`))
+			return
+		}
+		w.Write([]byte(`{"ok":true}`))
+	}))
+	defer srv.Close()
+
+	var buf bytes.Buffer
+	tg := newTelegramAt(srv.URL, "123:abc", "200")
+	tg.Subs = &memSubs{subs: []string{"-100"}}
+	tg.backoff = time.Millisecond
+	tg.Log = slog.New(slog.NewTextHandler(&buf, nil))
+	if err := tg.Send(context.Background(), "текст"); err != nil {
+		t.Fatalf("сбой у подписчика не должен ронять Send: %v", err)
+	}
+	mu.Lock()
+	defer mu.Unlock()
+	got200 := false
+	for _, id := range seen {
+		if id == "200" {
+			got200 = true
+		}
+	}
+	if !got200 {
+		t.Fatalf("живой адресат не получил сообщение: %v", seen)
+	}
+	if !strings.Contains(buf.String(), "chat=-100") {
+		t.Fatalf("журнал без chat id сбойного подписчика: %s", buf.String())
+	}
+}
+
 func TestSendLogsThroughField(t *testing.T) {
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusForbidden)
