@@ -34,6 +34,10 @@ CREATE TABLE IF NOT EXISTS fresh (
     last_ok_at     TEXT,
     last_events_at TEXT
 );
+CREATE TABLE IF NOT EXISTS subscribers (
+    chat_id    TEXT PRIMARY KEY,
+    created_at TEXT NOT NULL
+);
 `
 
 func Open(path string) (*Store, error) {
@@ -158,6 +162,56 @@ func (s *Store) Fresh(source string) (lastOK, lastEvents time.Time, err error) {
 		}
 	}
 	return lastOK, lastEvents, nil
+}
+
+// Subscribe записывает подписчика уведомлений и говорит, была ли запись
+// новой: повторная подписка существующий chat id не двигает.
+func (s *Store) Subscribe(chatID string, at time.Time) (bool, error) {
+	res, err := s.db.Exec(
+		"INSERT INTO subscribers (chat_id, created_at) VALUES (?, ?) ON CONFLICT (chat_id) DO NOTHING",
+		chatID, at.UTC().Format(time.RFC3339))
+	if err != nil {
+		return false, fmt.Errorf("запись subscribers: %w", err)
+	}
+	n, err := res.RowsAffected()
+	if err != nil {
+		return false, fmt.Errorf("запись subscribers: %w", err)
+	}
+	return n == 1, nil
+}
+
+// Unsubscribe снимает подписку и говорит, была ли она активна.
+func (s *Store) Unsubscribe(chatID string) (bool, error) {
+	res, err := s.db.Exec("DELETE FROM subscribers WHERE chat_id = ?", chatID)
+	if err != nil {
+		return false, fmt.Errorf("удаление subscribers: %w", err)
+	}
+	n, err := res.RowsAffected()
+	if err != nil {
+		return false, fmt.Errorf("удаление subscribers: %w", err)
+	}
+	return n == 1, nil
+}
+
+// SubscriberIDs отдаёт активных подписчиков в порядке подписки.
+func (s *Store) SubscriberIDs() ([]string, error) {
+	rows, err := s.db.Query("SELECT chat_id FROM subscribers ORDER BY created_at, chat_id")
+	if err != nil {
+		return nil, fmt.Errorf("чтение subscribers: %w", err)
+	}
+	defer rows.Close()
+	var ids []string
+	for rows.Next() {
+		var id string
+		if err := rows.Scan(&id); err != nil {
+			return nil, fmt.Errorf("чтение subscribers: %w", err)
+		}
+		ids = append(ids, id)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("чтение subscribers: %w", err)
+	}
+	return ids, nil
 }
 
 // Namespaced ограничивает доступ адаптера к kv его собственным источником.

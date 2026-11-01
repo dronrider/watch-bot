@@ -72,6 +72,66 @@ func TestKVNamespaced(t *testing.T) {
 	}
 }
 
+func TestSubscribers(t *testing.T) {
+	s := open(t)
+	at := time.Date(2026, 10, 30, 0, 0, 0, 0, time.UTC)
+	if ids, err := s.SubscriberIDs(); err != nil || len(ids) != 0 {
+		t.Fatalf("пустой список: ids=%v err=%v", ids, err)
+	}
+	if added, err := s.Subscribe("100", at); err != nil || !added {
+		t.Fatalf("первая подписка: added=%v err=%v", added, err)
+	}
+	if added, err := s.Subscribe("100", at.Add(time.Minute)); err != nil || added {
+		t.Fatalf("повторная подписка: added=%v err=%v", added, err)
+	}
+	if added, err := s.Subscribe("200", at.Add(time.Minute)); err != nil || !added {
+		t.Fatalf("вторая подписка: added=%v err=%v", added, err)
+	}
+	ids, err := s.SubscriberIDs()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(ids) != 2 || ids[0] != "100" || ids[1] != "200" {
+		t.Fatalf("подписчики %v, ожидались [100 200]", ids)
+	}
+	removed, err := s.Unsubscribe("100")
+	if err != nil || !removed {
+		t.Fatalf("отписка: removed=%v err=%v", removed, err)
+	}
+	removed, err = s.Unsubscribe("100")
+	if err != nil || removed {
+		t.Fatalf("повторная отписка: removed=%v err=%v", removed, err)
+	}
+	ids, err = s.SubscriberIDs()
+	if err != nil || len(ids) != 1 || ids[0] != "200" {
+		t.Fatalf("подписчики после отписки %v, ожидался [200]", ids)
+	}
+}
+
+func TestSubscribersSurviveReopen(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "state.db")
+	s, err := Open(path)
+	if err != nil {
+		t.Fatalf("Open: %v", err)
+	}
+	at := time.Date(2026, 10, 30, 0, 0, 0, 0, time.UTC)
+	if added, err := s.Subscribe("-100", at); err != nil || !added {
+		t.Fatalf("подписка: added=%v err=%v", added, err)
+	}
+	if err := s.Close(); err != nil {
+		t.Fatalf("Close: %v", err)
+	}
+	reopened, err := Open(path)
+	if err != nil {
+		t.Fatalf("повторное Open: %v", err)
+	}
+	defer reopened.Close()
+	ids, err := reopened.SubscriberIDs()
+	if err != nil || len(ids) != 1 || ids[0] != "-100" {
+		t.Fatalf("подписчики после переоткрытия %v, ожидался [-100]", ids)
+	}
+}
+
 func TestFresh(t *testing.T) {
 	s := open(t)
 	ok, events, err := s.Fresh("src")
